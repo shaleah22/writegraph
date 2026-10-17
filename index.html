@@ -1,0 +1,1364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0} img{max-width:100%} [hidden]{display:none!important}</style>
+<title>Write It, Graph It</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Overpass:wght@600;800;900&family=Overpass+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one problem card at a time under a highway-guide-sign header; number line drawn in "teacher's blue marker" */
+:root {
+  --bg: #edf1ed;
+  --surface: #ffffff;
+  --ink: #16211b;
+  --muted: #55645b;
+  --line: #cdd8cf;
+  --accent: #0d6a43;
+  --accent-ink: #ffffff;
+  --plot: #1b4fd1;
+  --plot-soft: rgba(27, 79, 209, .18);
+  --good: #17733a;
+  --good-bg: #e2f2e7;
+  --bad: #b42318;
+  --bad-bg: #fbe8e5;
+  --sign-white: #ffffff;
+  --sign-black: #141414;
+  --sign-green: #0d6a43;
+  --sign-blue: #1d4fa0;
+  --sign-brown: #6b3a24;
+  --f-display: "Overpass", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Overpass Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1612; --surface: #17211b; --ink: #e4ebe5; --muted: #99a99f; --line: #2c3a31;
+    --accent: #3daa76; --accent-ink: #07130c; --plot: #7ea5ff; --plot-soft: rgba(126, 165, 255, .22);
+    --good: #62cb89; --good-bg: #13291c; --bad: #ff8b7c; --bad-bg: #2f1612;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1612; --surface: #17211b; --ink: #e4ebe5; --muted: #99a99f; --line: #2c3a31;
+  --accent: #3daa76; --accent-ink: #07130c; --plot: #7ea5ff; --plot-soft: rgba(126, 165, 255, .22);
+  --good: #62cb89; --good-bg: #13291c; --bad: #ff8b7c; --bad-bg: #2f1612;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+}
+.wrap {
+  max-width: 1280px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+/* Header styled as a guide sign */
+.guide {
+  background: var(--sign-green); color: var(--sign-white);
+  border-radius: 14px; padding: 6px;
+}
+.guide-inner {
+  border: 3px solid var(--sign-white); border-radius: 10px;
+  padding: 16px 20px; display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between;
+}
+.guide h1 {
+  margin: 0; font-family: var(--f-display); font-weight: 900; font-size: clamp(1.7rem, 5vw, 2.4rem);
+  letter-spacing: .01em; line-height: 1.05; text-wrap: balance;
+}
+.guide p { margin: 4px 0 0; font-size: .98rem; max-width: 46ch; opacity: .92; }
+.guide-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.score { font-family: var(--f-display); font-weight: 800; font-size: 1rem; letter-spacing: .04em; text-transform: uppercase; text-align: right; }
+.score b { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.btn-sign {
+  font: 700 .9rem var(--f-display); letter-spacing: .06em; text-transform: uppercase;
+  background: var(--sign-white); color: var(--sign-green); border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer;
+}
+.btn-sign:hover { filter: brightness(.94); }
+
+/* Clue words */
+details.clues { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+details.clues summary {
+  cursor: pointer; padding: 12px 16px; font-family: var(--f-display); font-weight: 800; letter-spacing: .05em; text-transform: uppercase; font-size: .9rem;
+}
+.clue-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; padding: 0 16px 14px; }
+.clue-col { min-width: 0; }
+.clue-col .sym { font-family: var(--f-mono); font-weight: 700; font-size: 1.25rem; color: var(--plot); }
+.clue-col .rule { font-size: .82rem; color: var(--muted); margin: 2px 0 6px; }
+.clue-col ul { margin: 0; padding-left: 18px; font-size: .92rem; }
+.clue-note { padding: 0 16px 14px; font-size: .9rem; color: var(--muted); margin: 0; }
+
+/* Progress dots */
+.dots { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.dots-label { font-family: var(--f-display); font-weight: 800; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.dot {
+  width: 34px; height: 34px; border-radius: 8px; border: 2px solid var(--line); background: var(--surface); color: var(--muted);
+  font: 700 .85rem var(--f-mono); cursor: pointer; display: grid; place-items: center; padding: 0;
+}
+.dot.right { background: var(--good-bg); border-color: var(--good); color: var(--good); }
+.dot.fixed { background: var(--surface); border-color: var(--good); color: var(--good); border-style: dashed; }
+.dot.miss { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+.dot.current { outline: 3px solid var(--plot); outline-offset: 2px; }
+
+.banner {
+  background: var(--good-bg); border: 1px solid var(--good); color: var(--ink); border-radius: 12px; padding: 14px 18px;
+  display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between;
+}
+.banner strong { font-family: var(--f-display); font-size: 1.15rem; }
+
+/* Problem card */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+@media (min-width: 900px) {
+  .card { padding: 28px 32px; gap: 24px; }
+  .situation { font-size: 1.4rem; max-width: none; }
+}
+.card-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.eyebrow { font-family: var(--f-display); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: .82rem; color: var(--muted); }
+.chip { font: 700 .75rem var(--f-display); letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.chip.right { color: var(--good); border-color: var(--good); background: var(--good-bg); }
+.chip.miss { color: var(--bad); border-color: var(--bad); background: var(--bad-bg); }
+
+.scenario { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.scn-text { flex: 1 1 280px; min-width: 0; }
+.situation { font-size: 1.22rem; line-height: 1.45; margin: 0; max-width: 60ch; text-wrap: pretty; }
+.def { margin: 10px 0 0; color: var(--muted); font-size: .95rem; }
+.def b { font-family: var(--f-mono); color: var(--ink); }
+
+/* Road / regulatory sign plates */
+.plate {
+  flex: 0 0 auto; width: 148px; border-radius: 12px; padding: 5px; font-family: var(--f-display); font-weight: 800; text-transform: uppercase;
+}
+.plate-in { border-radius: 8px; border: 3px solid; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 0; text-align: center; line-height: 1.05; }
+.plate .ln { font-size: 1.02rem; letter-spacing: .02em; }
+.plate .big { font-size: 2.7rem; font-weight: 900; line-height: 1; margin-block: 2px; letter-spacing: -.01em; }
+.plate-reg { background: var(--sign-white); color: var(--sign-black); box-shadow: 0 0 0 1px var(--line); }
+.plate-reg .plate-in { border-color: var(--sign-black); }
+.plate-guide { background: var(--sign-green); color: var(--sign-white); }
+.plate-guide .plate-in { border-color: var(--sign-white); }
+.plate-brown { background: var(--sign-brown); color: var(--sign-white); }
+.plate-brown .plate-in { border-color: var(--sign-white); }
+.plate-notice { background: var(--sign-white); color: var(--sign-black); box-shadow: 0 0 0 1px var(--line); }
+.plate-notice .plate-in { border-color: var(--sign-black); padding-top: 0; overflow: hidden; }
+.plate-notice .band { background: var(--sign-blue); color: var(--sign-white); align-self: stretch; margin: 0 -8px 8px; padding: 6px 0 4px; font-size: 1.15rem; font-weight: 900; letter-spacing: .06em; }
+
+/* Steps */
+.step { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding-top: 16px; }
+.step h3 { margin: 0; display: flex; gap: 10px; align-items: center; font-family: var(--f-display); font-weight: 800; font-size: 1.05rem; letter-spacing: .02em; }
+.stepno { width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; font-size: .85rem; }
+.expr {
+  display: inline-flex; gap: 8px; align-items: center; align-self: flex-start;
+  padding: 8px 12px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg);
+}
+.expr.ok { border-color: var(--good); }
+.expr.no { border-color: var(--bad); }
+.slot {
+  font: 700 1.7rem var(--f-mono); min-width: 52px; height: 52px; padding: 0 10px; border-radius: 8px;
+  display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line); color: var(--plot);
+}
+.slot.x { color: var(--ink); background: transparent; border-color: transparent; min-width: 0; padding: 0 4px; }
+.slot.empty { color: var(--muted); border-style: dashed; }
+.pickrow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.pickrow .seg-label { width: 70px; }
+.tiles { display: flex; flex-wrap: wrap; gap: 8px; }
+.tile {
+  font: 700 1.25rem var(--f-mono); min-width: 58px; min-height: 52px; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; line-height: 1.1;
+}
+.tile small { font: 600 .68rem var(--f-body); color: var(--muted); max-width: 11ch; text-align: center; }
+.tile:hover { border-color: var(--plot); }
+.tile[aria-pressed="true"] { background: var(--plot); border-color: var(--plot); color: var(--surface); }
+.tile[aria-pressed="true"] small { color: var(--surface); }
+.tile:disabled { cursor: default; }
+.tile:disabled:not([aria-pressed="true"]) { opacity: .4; }
+.tile:disabled:hover { border-color: var(--line); }
+.tile[aria-pressed="true"]:disabled:hover { border-color: var(--plot); }
+.ask { display: flex; flex-direction: column; gap: 8px; }
+.ask-part { font-family: var(--f-display); font-weight: 800; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--plot); }
+.ask-q { margin: 0; font-size: 1.08rem; font-weight: 700; }
+.tile.wrong { text-decoration: line-through; border-color: var(--bad); color: var(--bad); }
+.tile.wrong:disabled { opacity: .55; }
+.slot.current { border: 2px dashed var(--plot); color: var(--plot); }
+.step-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.lock-note { display: none; margin: 0; padding: 8px 12px; border-radius: 8px; border: 1px dashed var(--line); color: var(--muted); font-size: .95rem; }
+.step.locked .lock-note { display: block; }
+.step.locked .tip, .step.locked .line-wrap, .step.locked .controls { opacity: .4; pointer-events: none; }
+.tip { margin: 0; font-size: .88rem; color: var(--muted); }
+
+.line-wrap { overflow: hidden; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); }
+#nl { display: block; width: 100%; height: clamp(104px, 11vw, 136px); cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
+#nl.following { cursor: ew-resize; }
+#nl:focus { outline: 3px solid var(--plot); outline-offset: -3px; border-radius: 12px; }
+#nl .axis { stroke: var(--ink); stroke-width: 2.5; }
+#nl .axis-head { fill: var(--ink); }
+#nl .tick { stroke: var(--ink); stroke-width: 2; }
+#nl .tlabel { fill: var(--ink); font: 600 15px var(--f-mono); text-anchor: middle; }
+#nl .shade { stroke: var(--plot); stroke-width: 7; stroke-linecap: butt; }
+#nl .shade-head { fill: var(--plot); }
+#nl .pt { stroke: var(--plot); stroke-width: 3.5; }
+#nl .pt.closed { fill: var(--plot); }
+#nl .pt.open { fill: var(--bg); }
+#nl .pt.unset { fill: var(--bg); stroke-dasharray: 4 3; }
+#nl .ghost { fill: var(--plot-soft); stroke: none; pointer-events: none; }
+#nl .ann { font-family: var(--f-body); font-weight: 700; text-anchor: middle; }
+#nl .ann.yes { fill: var(--good); }
+#nl .ann.no { fill: var(--bad); }
+#nl .ann-br { fill: none; stroke-width: 2; }
+#nl .ann.vert { text-anchor: start; }
+#nl .ann-arrow { stroke-width: 2.5; }
+#nl .ann-arrow.yes { stroke: var(--good); }
+#nl .ann-arrow.no { stroke: var(--bad); }
+#nl .ann-head.yes { fill: var(--good); }
+#nl .ann-head.no { fill: var(--bad); }
+#nl .ann-br.yes { stroke: var(--good); }
+#nl .ann-br.no { stroke: var(--bad); }
+#nl .hint { fill: var(--muted); font: 600 14px var(--f-body); text-anchor: middle; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.seg { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.seg-label { font-family: var(--f-display); font-weight: 800; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+.seg button {
+  font: 700 .95rem var(--f-body); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--plot); border-color: var(--plot); color: var(--surface); }
+.linkbtn { background: none; border: 0; color: var(--muted); font: 600 .9rem var(--f-body); text-decoration: underline; cursor: pointer; padding: 6px; }
+
+.fb { margin: 0; font-size: .98rem; padding: 8px 12px; border-radius: 8px; }
+.fb:empty { display: none; }
+.fb.ok { background: var(--good-bg); color: var(--good); border: 2px solid var(--good);
+  display: flex; align-items: center; gap: 14px; padding: 12px 18px;
+  font: 900 clamp(1.6rem, 4vw, 2.2rem)/1.1 var(--f-display); letter-spacing: .01em; }
+.fb-sub { display: block; font: 700 1rem var(--f-body); color: var(--muted); margin-top: 4px; letter-spacing: 0; }
+#fb-g.ok { cursor: pointer; flex-wrap: wrap; }
+#fb-g.ok:hover { filter: brightness(.97); }
+.go-next .touch { display: none; }
+@media (hover: none) and (pointer: coarse) { .go-next .kb { display: none; } .go-next .touch { display: inline; } }
+.go-next { margin-left: auto; font: 700 1rem var(--f-body); letter-spacing: 0; color: var(--good); background: var(--surface); border: 1.5px solid var(--good); border-radius: 999px; padding: 6px 14px; }
+.ok-badge { flex: 0 0 auto; width: 1.5em; height: 1.5em; border-radius: 50%; background: var(--good); color: var(--good-bg);
+  display: grid; place-items: center; font-size: .9em; }
+@media (prefers-reduced-motion: no-preference) {
+  .fb.ok { animation: pop .35s cubic-bezier(.2, 1.4, .4, 1); }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: none; opacity: 1; } }
+}
+.fb.no { background: var(--bad-bg); color: var(--bad); }
+.fb code { font-family: var(--f-mono); font-weight: 700; }
+
+.why { border-left: 4px solid var(--plot); padding: 10px 14px; background: var(--bg); border-radius: 0 10px 10px 0; font-size: 1rem; }
+.why:empty { display: none; }
+.why code { font-family: var(--f-mono); font-weight: 700; color: var(--plot); }
+.why { display: flex; flex-direction: column; gap: 8px; font-size: 1.02rem; }
+.ex-head code { font-size: 1.1rem; }
+.ex-row { display: flex; gap: 12px; align-items: center; }
+.ex-row > div { min-width: 0; }
+.ex-label { font-weight: 700; }
+.why b.yes { color: var(--good); }
+.why b.no { color: var(--bad); }
+.sw { flex: 0 0 auto; width: 44px; height: 16px; }
+.sw-shade { stroke: var(--plot); stroke-width: 5; }
+.sw-head { fill: var(--plot); }
+.sw-axis { stroke: var(--ink); stroke-width: 2; }
+.sw-open { fill: var(--bg); stroke: var(--plot); stroke-width: 2.5; }
+.sw-closed { fill: var(--plot); stroke: var(--plot); stroke-width: 2.5; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-top: 1px solid var(--line); padding-top: 16px; }
+.count { font: 700 .95rem var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.count b { color: var(--good); font-size: 1.15rem; }
+.goal { display: inline-flex; align-items: center; gap: 10px; }
+@media (max-width: 520px) {
+  .goal { order: -1; flex-basis: 100%; }
+  .goal-bar { flex: 1 1 auto; width: auto; }
+  .actions .spacer { display: none; }
+}
+.goal-bar { width: 120px; height: 10px; border-radius: 99px; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+.goal-bar > span { display: block; height: 100%; background: var(--good); border-radius: 99px; }
+.finish { background: var(--surface); border: 2px solid var(--good); border-radius: 16px; padding: 40px 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.finish .big-check { width: 84px; height: 84px; border-radius: 50%; background: var(--good); color: var(--good-bg); display: grid; place-items: center; font-size: 46px; font-weight: 900; }
+.finish h2 { margin: 0; font: 900 clamp(2rem, 6vw, 3rem)/1.05 var(--f-display); color: var(--good); }
+.finish p { margin: 0; font-size: 1.15rem; color: var(--muted); }
+.actions .spacer { flex: 1 1 auto; }
+.btn { font: 800 .95rem var(--f-display); letter-spacing: .05em; text-transform: uppercase; padding: 11px 18px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: transparent; }
+.btn:disabled { opacity: .45; cursor: default; }
+button:focus-visible, summary:focus-visible { outline: 3px solid var(--plot); outline-offset: 2px; }
+
+@media (max-width: 520px) {
+  .card { padding: 16px; }
+  .plate { width: 124px; }
+  .plate .big { font-size: 2.3rem; }
+  .guide-side { align-items: flex-start; }
+  .score { text-align: left; }
+  .situation { font-size: 1.1rem; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card { animation: in .25s ease-out; }
+  @keyframes in { from { transform: translateY(4px); opacity: .6; } to { transform: none; opacity: 1; } }
+}
+
+/* ---- One-screen layout: the card fills the window; the number line shrinks to fit ---- */
+html, body { height: 100%; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+.wrap { height: 100%; padding-block: 10px; gap: 0; }
+#card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.card { flex: 1 1 auto; min-height: 0; overflow: auto; gap: 12px; padding: 14px 22px; }
+.card > *, .step > * { flex-shrink: 0; }
+.step { padding-top: 10px; gap: 8px; }
+.step-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.step-head .fb { flex: 1 1 260px; }
+.slot { height: 46px; min-width: 46px; font-size: 1.5rem; }
+.tile { min-height: 46px; }
+.ask { gap: 6px; }
+.fb.ok { padding: 6px 14px; font-size: clamp(1.4rem, 3vw, 2rem); gap: 12px; }
+.line-wrap { position: relative; }
+#nl { position: absolute; inset: 0; width: 100%; height: 100%; }
+.graph-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.graph-row .spacer { flex: 1 1 auto; }
+.real { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+.real-cap { margin: 0; font-size: .95rem; color: var(--muted); }
+.real-cap b { color: var(--ink); }
+.graph-cap { margin: -2px 0 0; font-size: .95rem; color: var(--muted); }
+.graph-cap b { color: var(--ink); }
+.graph-cap code { font-family: var(--f-mono); font-weight: 700; color: var(--plot); }
+.real { border-top: 1px dashed var(--line); padding-top: 6px; }
+.expr.mini { padding: 4px 8px; gap: 6px; }
+.expr.mini .slot { height: 40px; min-width: 40px; font-size: 1.3rem; }
+#rl { display: block; width: 100%; height: 64px; }
+#rl .axis { stroke: var(--muted); stroke-width: 2; }
+#rl .axis-head { fill: var(--muted); }
+#rl .tick { stroke: var(--muted); stroke-width: 1.5; }
+#rl .tlabel { fill: var(--muted); font: 600 13px var(--f-mono); text-anchor: middle; }
+#rl .rdot { fill: var(--good); }
+#rl .rseg { stroke: var(--good); stroke-width: 6; stroke-linecap: butt; }
+#rl .rend.closed { fill: var(--good); stroke: var(--good); stroke-width: 3; }
+#rl .rend.open { fill: var(--bg); stroke: var(--good); stroke-width: 3; }
+#rl .more { fill: var(--good); font: 900 22px var(--f-display); }
+#rl .gs1 { stop-color: var(--good); stop-opacity: 1; }
+#rl .gs0 { stop-color: var(--good); stop-opacity: 0; }
+.plate { width: 116px; }
+.plate .ln { font-size: .85rem; }
+.plate .big { font-size: 2.1rem; }
+.plate-in { padding: 6px; }
+.plate-notice .band { font-size: .95rem; padding: 4px 0 2px; margin-bottom: 4px; }
+.scenario { gap: 16px; }
+.actions { padding-top: 10px; }
+@media (min-width: 900px) { .card { padding: 18px 28px; gap: 14px; } }
+@media (max-width: 520px) { .card { padding: 10px 14px; gap: 8px; } .plate { width: 92px; } .plate .big { font-size: 1.6rem; } .scenario { flex-wrap: nowrap; gap: 12px; } .scn-text { flex: 1 1 0; } .situation { font-size: 1.02rem; } .real-cap { font-size: .86rem; line-height: 1.35; } #rl { height: 52px; } .graph-cap .long { display: none; } .graph-cap { font-size: .88rem; } .fb.ok { font-size: 1.3rem; padding: 4px 10px; } .go-next { font-size: .85rem; padding: 4px 10px; } .plate { width: 84px; } .plate .big { font-size: 1.45rem; } .plate .ln { font-size: .72rem; } }
+
+/* ---- turn-in page ---- */
+.turnin { flex: 1 1 auto; min-height: 0; overflow: auto; background: var(--surface); border: 2px solid var(--good); border-radius: 16px;
+  padding: 20px clamp(16px, 4vw, 36px); display: flex; flex-direction: column; gap: 14px; }
+.ti-top { display: flex; align-items: center; gap: 18px; }
+.turnin .big-check { flex: 0 0 auto; width: 64px; height: 64px; border-radius: 50%; background: var(--good); color: var(--good-bg); display: grid; place-items: center; font-size: 36px; font-weight: 900; }
+.turnin h2 { margin: 0; font: 900 clamp(1.8rem, 5vw, 2.6rem)/1.05 var(--f-display); color: var(--good); }
+.ti-sub { margin: 4px 0 0; color: var(--muted); font-size: 1.05rem; }
+#gform { display: flex; flex-direction: column; gap: 12px; max-width: 760px; }
+.ti-warn { background: var(--good-bg); border-radius: 10px; padding: 10px 14px; font-size: .98rem; }
+.ti-fields { display: grid; grid-template-columns: 110px 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .ti-fields { grid-template-columns: 1fr; } }
+.ti-field label { display: flex; align-items: center; margin-bottom: 4px; font-weight: 700; }
+.ti-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: 8px; border-radius: 50%; background: var(--ink); color: var(--surface); font-size: 13px; }
+.ti-field input { font: inherit; font-size: 1.05rem; color: var(--ink); width: 100%; border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 12px; background: var(--bg); }
+.ti-field input:focus { outline: 2px solid var(--plot); outline-offset: 1px; }
+.ti-check { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 14px; display: grid; gap: 2px; }
+.ti-check .hd { color: var(--muted); font-size: .9rem; }
+.ti-check .r { display: flex; gap: 12px; align-items: baseline; }
+.ti-check .r:last-child { padding-top: 4px; border-top: 1px solid var(--line); margin-top: 2px; }
+.ti-check .t { color: var(--muted); min-width: 88px; font-size: .9rem; }
+.ti-check .v.empty { color: var(--muted); }
+.ti-btn { align-self: flex-start; font-size: 1.05rem; padding: 12px 22px; }
+.ti-feedback { margin: 0; font-size: 1.05rem; }
+.ti-feedback:empty { display: none; }
+.ti-feedback .ok { color: var(--good); font: 900 1.6rem var(--f-display); }
+.ti-feedback .nt { color: var(--muted); }
+.ti-after { display: flex; }
+.turnin-btn { border-color: var(--good); color: var(--good); }
+.turnin h2.early { color: var(--ink); }
+.turnin:has(h2.early) { border-color: var(--line); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div id="banner"></div>
+  <main id="card"></main>
+</div>
+
+<script>
+(function () {
+  const $ = s => document.querySelector(s);
+  const fmt = v => (Number.isInteger(v) ? String(v) : String(+v.toFixed(2))).replace('-', '−');
+  const asc = v => Number.isInteger(v) ? String(v) : String(+v.toFixed(2));
+  const SYM = { '>': '>', '<': '<', '>=': '≥', '<=': '≤' };
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const A = n => fmt(Math.abs(n));
+
+  // ---------- Problem templates ----------
+  const T = [
+    { sign: '>=', clue: 'at least', values: [20, 22, 25], step: 1, nonneg: true,
+      text: n => `Lightning hits the Empire State Building at least ${fmt(n)} times a year.`, def: 'number of lightning strikes in a year' },
+    { sign: '>=', clue: 'at least', values: [48, 52, 54], step: 2, nonneg: true,
+      text: n => `To ride the roller coaster, you must be at least ${fmt(n)} inches tall.`, def: 'height in inches' },
+    { sign: '>=', clue: 'at or above', values: [100], step: 10,
+      text: n => `Water is steam at temperatures at or above ${fmt(n)}°C.`, def: 'temperature in °C' },
+    { sign: '>=', clue: 'as low as', values: [-40, -45, -50], step: 5,
+      text: n => `A generator runs in temperatures as low as ${fmt(n)}°F.`, def: 'temperature in °F',
+      why: n => `"As low as ${fmt(n)}" means ${fmt(n)} is the coldest it can handle. ${fmt(n)} works, and so does every warmer temperature.` },
+    { sign: '>=', clue: 'at least', values: [200, 250, 300], step: 25, nonneg: true,
+      text: n => `To test for a black belt, Marco must log at least ${fmt(n)} hours of training.`, def: 'hours of training' },
+    { sign: '>=', clue: 'minimum', values: [40, 45], step: 5, nonneg: true, max: 70,
+      plate: n => ({ type: 'reg', lines: ['Minimum', 'Speed', '!' + fmt(n)] }),
+      text: () => `Allowed speeds on this highway.`, def: 'speed in miles per hour' },
+    { sign: '>=', clue: 'no one under', values: [16, 18, 21], step: 1, nonneg: true,
+      plate: n => ({ type: 'notice', lines: ['No one', 'under ' + fmt(n), 'permitted'] }),
+      text: () => `Ages of people allowed in.`, def: 'age in years',
+      why: n => `"No one under ${fmt(n)}" keeps out ages below ${fmt(n)}. A person who is exactly ${fmt(n)} can go in, and so can anyone older.` },
+
+    { sign: '>', clue: 'more than', values: [30, 40, 50], step: 5, nonneg: true,
+      text: n => `Grandma baked more than ${fmt(n)} cookies for the family reunion.`, def: 'number of cookies' },
+    { sign: '>', clue: 'more than', values: [70, 75, 80], step: 5, nonneg: true,
+      text: n => `To ride the zip line, you must weigh more than ${fmt(n)} pounds.`, def: 'weight in pounds' },
+    { sign: '>', clue: 'more than', values: [400, 500, 600], step: 50, nonneg: true,
+      text: n => `More than ${fmt(n)} fans showed up to the homecoming game.`, def: 'number of fans' },
+    { sign: '>', clue: 'over', values: [80, 90, 120], step: 10, nonneg: true,
+      text: n => `The marching band has over ${fmt(n)} members.`, def: 'number of band members' },
+    { sign: '>', clue: 'greater than', values: [-22, -15, -8], step: 1,
+      text: n => `A number is greater than ${fmt(n)}.`, def: 'the number' },
+
+    { sign: '<=', clue: 'cannot exceed', values: [20, 22, 24], step: 1, nonneg: true,
+      text: n => `Carry-on bags cannot exceed ${fmt(n)} inches in length.`, def: 'length of the bag in inches' },
+    { sign: '<=', clue: 'no more than', values: [60, 66, 72], step: 2, nonneg: true,
+      text: n => `No more than ${fmt(n)} students can ride the school bus.`, def: 'number of students' },
+    { sign: '<=', clue: 'or fewer', values: [12, 15, 20], step: 1, nonneg: true,
+      plate: n => ({ type: 'guide', lines: ['Self', 'checkout', '!' + fmt(n), 'items or fewer'] }),
+      text: n => `Self-checkout is for ${fmt(n)} items or fewer.`, def: 'number of items' },
+    { sign: '<=', clue: 'capacity', values: [24, 28, 36], step: 2, nonneg: true,
+      plate: n => ({ type: 'reg', lines: ['Pool', 'capacity', '!' + fmt(n), 'persons'] }),
+      text: () => `Number of people allowed in the pool.`, def: 'number of people' },
+    { sign: '<=', clue: 'speed limit', values: [25, 30, 35], step: 5, nonneg: true, max: 70,
+      plate: n => ({ type: 'reg', lines: ['Speed', 'limit', '!' + fmt(n)] }),
+      text: () => `Allowed speeds on this road.`, def: 'speed in miles per hour' },
+    { sign: '<=', clue: 'maximum', values: [2000, 2500, 3000], step: 250, nonneg: true,
+      plate: n => ({ type: 'reg', lines: ['Elevator', 'maximum', '!' + fmt(n), 'lbs'] }),
+      text: () => `Weight allowed in the elevator.`, def: 'weight in pounds' },
+    { sign: '<=', clue: 'weight limit', values: [5, 8, 10], step: 1, nonneg: true,
+      plate: n => ({ type: 'brown', lines: ['Weight', 'limit', '!' + fmt(n), 'tons'] }),
+      text: () => `Vehicle weights allowed on this bridge.`, def: 'vehicle weight in tons' },
+    { sign: '<=', clue: 'at most', values: [13, 15, 17], step: 1, nonneg: true,
+      text: n => `Maya's age is at most ${fmt(n)}.`, def: "Maya's age" },
+
+    { sign: '<', clue: 'fewer than', values: [8, 10, 12], step: 1, nonneg: true,
+      text: n => `Fewer than ${fmt(n)} kids can be in the bounce house.`, def: 'number of kids' },
+    { sign: '<', clue: 'under', values: [10, 12], step: 1, nonneg: true,
+      text: n => `The kids' menu is for children under ${fmt(n)} years old.`, def: 'age in years' },
+    { sign: '<', clue: 'shorter than', values: [6.5, 7.5, 8.5], step: 0.5, nonneg: true,
+      text: n => `The width of the photo is shorter than ${fmt(n)} inches.`, def: 'width of the photo in inches' },
+    { sign: '<', clue: 'deeper than', values: [-200, -300, -400], step: 50,
+      text: n => `A submarine is deeper than ${A(n)} feet below sea level (${fmt(n)} ft).`, def: 'elevation in feet',
+      why: n => `${A(n)} feet below sea level is ${fmt(n)}. Deeper than that means a lower number, so the elevation is less than ${fmt(n)}, but not ${fmt(n)} itself.` }
+  ];
+
+  // Variable letter and short meaning for each template, in the same order as T
+  const VARS = [
+    ['s', 'strikes'], ['h', 'height'], ['t', 'temperature'], ['t', 'temperature'], ['h', 'hours'], ['s', 'speed'], ['a', 'age'],
+    ['c', 'cookies'], ['w', 'weight'], ['f', 'fans'], ['m', 'members'], ['n', 'number'],
+    ['L', 'length'], ['s', 'students'], ['i', 'items'], ['p', 'people'], ['s', 'speed'], ['w', 'weight'], ['w', 'weight'], ['a', 'age'],
+    ['k', 'kids'], ['a', 'age'], ['w', 'width'], ['e', 'elevation']
+  ];
+  T.forEach((t, i) => { t.v = VARS[i][0]; t.vn = VARS[i][1]; });
+
+  const EXPL = [
+    ['Strike counts', ' strikes', 'could be how many times lightning hits', "too few, it's hit at least that many times"],
+    ['Heights', ' inches tall', 'can ride the roller coaster', "can't ride the roller coaster"],
+    ['Temperatures', '°C', 'water is steam', 'water is not steam'],
+    ['Temperatures', '°F', 'the generator runs', 'too cold, the generator stops'],
+    ['Training hours', ' hours', 'Marco can test for his black belt', "Marco can't test yet"],
+    ['Speeds', ' mph', 'allowed on the highway', 'too slow for the highway'],
+    ['Ages', ' years old', 'allowed in', 'not allowed in'],
+    ['Cookie counts', ' cookies', 'could be how many Grandma baked', 'too few cookies'],
+    ['Weights', ' pounds', 'can ride the zip line', "can't ride the zip line"],
+    ['Crowd sizes', ' fans', 'could be how many fans came', 'too few fans'],
+    ['Band sizes', ' members', 'could be how many members the band has', 'too few members'],
+    ['Numbers', '', 'make the statement true', 'make the statement false'],
+    ['Bag lengths', ' inches', 'the bag is allowed', 'the bag is too long'],
+    ['Student counts', ' students', 'everyone fits on the bus', 'too many students for the bus'],
+    ['Item counts', ' items', 'you can use self-checkout', "you can't use self-checkout"],
+    ['Numbers of people', ' people', 'allowed in the pool', 'too many people for the pool'],
+    ['Speeds', ' mph', 'legal on this road', 'speeding'],
+    ['Weights', ' pounds', 'safe for the elevator', 'too heavy for the elevator'],
+    ['Vehicle weights', ' tons', 'can cross the bridge', 'too heavy to cross the bridge'],
+    ['Ages', ' years old', "could be Maya's age", "too old to be Maya's age"],
+    ['Numbers of kids', ' kids', 'allowed in the bounce house', 'too many kids for the bounce house'],
+    ['Ages', ' years old', "can order off the kids' menu", "can't order off the kids' menu"],
+    ['Widths', ' inches', 'could be the width of the photo', 'too wide for the photo'],
+    ['Elevations', ' ft', "could be the submarine's elevation", 'not deep enough']
+  ];
+  T.forEach((t, i) => { [t.noun, t.unit, t.yes, t.no] = EXPL[i]; });
+
+  // Added situations. Fields: v/vn = variable and its meaning, noun = what the numbers are,
+  // pre/unit = how one value is written on the dot label, yes/no = shaded / not shaded labels
+  const D = n => '$' + fmt(n);
+  T.push(
+    // ---------- ≥ ----------
+    { sign: '>=', clue: 'at least', values: [13], step: 1, nonneg: true, v: 'a', vn: 'age', noun: 'Ages', unit: ' years old', yes: 'can go alone', no: 'needs an adult',
+      text: n => `You must be at least ${fmt(n)} to see a PG-13 movie without an adult.` },
+    { sign: '>=', clue: 'at least', values: [16], step: 1, nonneg: true, v: 'a', vn: 'age', noun: 'Ages', unit: ' years old', yes: 'can get a license', no: 'too young for a license',
+      text: n => `You must be at least ${fmt(n)} to get a driver's license.` },
+    { sign: '>=', clue: 'or more', values: [25, 35, 50], step: 5, nonneg: true, v: 'c', vn: 'order cost', noun: 'Order totals', pre: '$', unit: '', yes: 'ships free', no: 'pays for shipping',
+      text: n => `Orders of ${D(n)} or more get free shipping.` },
+    { sign: '>=', clue: 'at least', values: [3.0, 3.5], step: 0.1, nonneg: true, max: 4, v: 'g', vn: 'GPA', noun: 'GPAs', realMax: 4, unit: '', yes: 'makes honor roll', no: 'misses honor roll',
+      text: n => `You need a GPA of at least ${n.toFixed(1)} to make the honor roll.` },
+    { sign: '>=', clue: 'or higher', values: [65, 70], step: 5, nonneg: true, max: 100, v: 's', vn: 'score', noun: 'Scores', realMax: 100, unit: ' points', yes: 'passes', no: 'fails',
+      text: n => `You need a ${fmt(n)} or higher to pass the test.` },
+    { sign: '>=', clue: 'or higher', values: [100.4], step: 0.2, nonneg: true, v: 't', vn: 'temperature', noun: 'Temperatures', unit: '°F', yes: 'fever', no: 'no fever',
+      text: n => `A body temperature of ${fmt(n)}°F or higher is a fever.` },
+    { sign: '>=', clue: 'at least', values: [200, 250, 300], step: 25, nonneg: true, v: 'm', vn: 'money raised', noun: 'Amounts raised', pre: '$', unit: '', yes: 'trip is paid for', no: 'not enough money',
+      text: n => `The class must raise at least ${D(n)} for the field trip.` },
+    { sign: '>=', clue: 'as low as', values: [-10, -20, -30], step: 5, v: 't', vn: 'temperature', noun: 'Temperatures', unit: '°F', yes: 'jacket keeps you warm', no: 'too cold for the jacket',
+      text: n => `A winter jacket is rated for temperatures as low as ${fmt(n)}°F.` },
+
+    // ---------- > ----------
+    { sign: '>', clue: 'more than', values: [64, 72, 80], step: 2, nonneg: true, v: 'p', vn: 'points', noun: 'Scores', unit: ' points', yes: 'you win', no: "you don't win",
+      text: n => `The other team scored ${fmt(n)} points. To win, your team needs more than ${fmt(n)}.` },
+    { sign: '>', clue: 'faster than', values: [45, 55, 60], step: 5, nonneg: true, max: 70, v: 's', vn: 'speed', noun: 'Speeds', unit: ' mph', yes: 'gets a ticket', no: 'no ticket',
+      text: n => `Drivers going faster than ${fmt(n)} mph get a speeding ticket.` },
+    { sign: '>', clue: 'heavier than', values: [50], step: 5, nonneg: true, v: 'w', vn: 'weight', noun: 'Weights', unit: ' pounds', yes: 'pays a fee', no: 'no fee',
+      text: n => `At the airport, suitcases heavier than ${fmt(n)} pounds cost extra.` },
+    { sign: '>', clue: 'above', values: [32], step: 2, v: 't', vn: 'temperature', noun: 'Temperatures', unit: '°F', yes: 'ice melts', no: 'ice stays frozen',
+      text: n => `Ice melts when the temperature is above ${fmt(n)}°F.` },
+    { sign: '>', clue: 'more than', values: [10, 12, 15], step: 1, nonneg: true, v: 'v', vn: 'votes', noun: 'Vote counts', unit: ' votes', yes: 'you win', no: "you don't win",
+      text: n => `${fmt(2 * n)} students vote for class president. To win, you need more than ${fmt(n)} votes.` },
+    { sign: '>', clue: 'more than', values: [5, 8, 10], step: 1, nonneg: true, v: 'd', vn: 'data', noun: 'Data amounts', unit: ' GB', yes: 'pay extra', no: 'no extra charge',
+      text: n => `If you use more than ${fmt(n)} GB of phone data in a month, you pay extra.` },
+    { sign: '>', clue: 'hotter than', values: [90, 95, 100], step: 1, nonneg: true, v: 't', vn: 'temperature', noun: 'Temperatures', unit: '°F', yes: 'practice moves inside', no: 'practice stays outside',
+      text: n => `Soccer practice moves inside when it's hotter than ${fmt(n)}°F.` },
+
+    // ---------- ≤ ----------
+    { sign: '<=', clue: 'at most', values: [1, 2, 3], step: 0.5, nonneg: true, v: 'h', vn: 'hours', noun: 'Screen times', unit: ' hours', yes: 'allowed', no: 'too much screen time',
+      text: n => `You're allowed at most ${fmt(n)} hour${n === 1 ? '' : 's'} of screen time a day.` },
+    { sign: '<=', clue: 'up to', values: [160], step: 10, nonneg: true, v: 'c', vn: 'characters', noun: 'Message lengths', unit: ' characters', yes: 'fits in one text', no: 'too long for one text',
+      text: n => `A text message can be up to ${fmt(n)} characters long.` },
+    { sign: '<=', clue: 'no more than', values: [25, 40, 50], step: 5, nonneg: true, v: 'c', vn: 'cost', noun: 'Prices', pre: '$', unit: '', yes: 'you can afford it', no: 'over budget',
+      text: n => `You can spend no more than ${D(n)} on a birthday gift.` },
+    { sign: '<=', clue: 'up to', values: [2, 3, 4], step: 1, nonneg: true, v: 't', vn: 'toppings', noun: 'Topping counts', unit: ' toppings', yes: 'included in the deal', no: 'costs extra',
+      text: n => `The pizza deal includes up to ${fmt(n)} toppings.` },
+    { sign: '<=', clue: 'or colder', values: [0], step: 2, v: 't', vn: 'temperature', noun: 'Temperatures', unit: '°F', yes: 'food stays safe', no: 'too warm',
+      text: n => `A freezer should be set to ${fmt(n)}°F or colder.` },
+    { sign: '<=', clue: 'no more than', values: [6, 8, 10], step: 1, nonneg: true, v: 's', vn: 'students', noun: 'Group sizes', unit: ' students', yes: 'group is OK', no: 'too many students',
+      text: n => `On the field trip, each chaperone can watch no more than ${fmt(n)} students.` },
+    { sign: '<=', clue: 'or less', values: [3.4], step: 0.2, nonneg: true, v: 'o', vn: 'ounces', noun: 'Bottle sizes', unit: ' oz', yes: 'allowed through security', no: 'too big',
+      text: n => `Liquids in a carry-on bag must be ${fmt(n)} ounces or less.` },
+    { sign: '<=', clue: 'up to', values: [3, 5, 10], step: 1, nonneg: true, v: 'b', vn: 'books', noun: 'Book counts', unit: ' books', yes: 'can check them out', no: 'too many books',
+      text: n => `You can check out up to ${fmt(n)} library books at a time.` },
+
+    // ---------- < ----------
+    { sign: '<', clue: 'under', values: [2, 3, 5], step: 1, nonneg: true, v: 'a', vn: 'age', noun: 'Ages', unit: ' years old', yes: 'gets in free', no: 'pays to get in',
+      text: n => `Children under ${fmt(n)} get into the zoo free.` },
+    { sign: '<', clue: 'below', values: [10, 15, 20], step: 5, nonneg: true, max: 100, v: 'b', vn: 'battery', noun: 'Battery levels', unit: '%', yes: 'low-battery warning', no: 'no warning',
+      text: n => `Your phone warns you when the battery drops below ${fmt(n)}%.` },
+    { sign: '<', clue: 'fewer than', values: [70, 71, 72], step: 1, nonneg: true, v: 's', vn: 'strokes', noun: 'Stroke counts', unit: ' strokes', yes: 'beats par', no: "doesn't beat par",
+      text: n => `Par for the golf course is ${fmt(n)}. To beat par, you need fewer than ${fmt(n)} strokes.` },
+    { sign: '<', clue: 'less than', values: [5, 5.5, 6], step: 0.5, nonneg: true, v: 't', vn: 'time', noun: 'Mile times', unit: ' minutes', yes: 'new record', no: 'no record',
+      text: n => `To break the school record, you must run the mile in less than ${fmt(n)} minutes.` },
+    { sign: '<', clue: 'colder than', values: [-20, -25, -30], step: 5, v: 't', vn: 'temperature', noun: 'Wind chills', unit: '°F', yes: 'school closed', no: 'school open',
+      text: n => `School closes when the wind chill is colder than ${fmt(n)}°F.` },
+    { sign: '<', clue: 'deeper than', values: [-200], step: 50, v: 'e', vn: 'elevation', noun: 'Elevations', unit: ' m', yes: 'almost no sunlight', no: 'gets sunlight',
+      text: n => `Ocean water deeper than ${A(n)} meters below sea level (${fmt(n)} m) gets almost no sunlight.` },
+    { sign: '<', clue: 'below', values: [0], step: 10, v: 'b', vn: 'balance', noun: 'Balances', pre: '$', unit: '', yes: 'overdrawn', no: 'not overdrawn',
+      text: n => `A bank account is overdrawn when the balance is below ${D(n)}.` },
+    { sign: '<', clue: 'shorter than', values: [42, 48, 52], step: 2, nonneg: true, v: 'h', vn: 'height', noun: 'Heights', unit: ' inches', yes: 'must wear a life jacket', no: "doesn't need one",
+      text: n => `At the pool, swimmers shorter than ${fmt(n)} inches must wear a life jacket.` }
+  );
+  // Close versions of the quiz problems that had no match yet
+  T.push(
+    { sign: '>=', clue: 'at least', values: [3, 4, 5], step: 1, nonneg: true, v: 'j', vn: 'jokes', noun: 'Joke counts', unit: ' jokes', yes: 'could be how many jokes he told', no: 'too few jokes',
+      text: n => `Grandpa tells at least ${fmt(n)} dad jokes at every family dinner.` },
+    { sign: '>=', clue: 'at least', values: [10, 12, 14], step: 1, nonneg: true, v: 'f', vn: 'fish length', noun: 'Fish lengths', unit: ' inches', yes: 'you can keep it', no: 'throw it back',
+      text: n => `A snapper must be at least ${fmt(n)} inches long for you to keep it.` },
+    { sign: '>=', clue: 'stay back', values: [200, 300], step: 50, nonneg: true, v: 'd', vn: 'distance', noun: 'Distances', unit: ' feet', yes: 'safe distance', no: 'too close',
+      plate: n => ({ type: 'reg', lines: ['Stay back', '!' + fmt(n), 'feet'] }),
+      text: () => `This sign is on the back of a dump truck. How far behind it should cars stay?` },
+    { sign: '<=', clue: 'maximum', values: [90, 150, 200], step: 10, nonneg: true, v: 'p', vn: 'people', noun: 'Numbers of people', unit: ' people', yes: 'allowed in the gym', no: 'too many people',
+      plate: n => ({ type: 'reg', lines: ['Maximum', 'occupancy', '!' + fmt(n)] }),
+      text: () => `This sign is in the school gym. How many people are allowed in the gym?` },
+    { sign: '<=', clue: 'maximum', values: [6, 8, 10], step: 1, nonneg: true, v: 'p', vn: 'people', noun: 'Numbers of people', unit: ' people', yes: 'allowed in the hot tub', no: 'too many people',
+      plate: n => ({ type: 'reg', lines: ['Hot tub', 'maximum', '!' + fmt(n), 'persons'] }),
+      text: () => `How many people are allowed in the hot tub?` },
+    { sign: '>=', clue: 'or more', values: [3, 4], step: 1, nonneg: true, v: 'x', vn: 'axles', noun: 'Axle counts', unit: ' axles', yes: 'pays the truck toll', no: 'pays the car toll',
+      note: n => `Axles only come in whole numbers, and real vehicles only have so many of them. The arrow means "${fmt(n)} or more." It doesn't mean a truck can have endless axles.`,
+      text: n => `On the turnpike, vehicles with ${fmt(n)} or more axles pay the truck toll.` },
+    { sign: '>', clue: 'more than', values: [10, 15, 20], step: 1, nonneg: true, v: 'm', vn: 'minutes late', noun: 'Minutes late', unit: ' minutes late', yes: "don't save a seat", no: 'save a seat',
+      text: n => `My friend says, "Don't save me a seat if I'm more than ${fmt(n)} minutes late."` },
+    { sign: '<', clue: 'fewer than', values: [40, 60, 75], step: 5, nonneg: true, v: 'm', vn: 'marbles', noun: 'Marble counts', unit: ' marbles', yes: 'could be how many marbles', no: 'too many marbles',
+      text: n => `There are fewer than ${fmt(n)} marbles in the jar.` },
+    // "who is NOT allowed" versions
+    { sign: '<', clue: 'NOT allowed', values: [16, 18, 21], step: 1, nonneg: true, v: 'a', vn: 'age', noun: 'Ages', unit: ' years old', yes: 'not allowed in', no: 'allowed in',
+      plate: n => ({ type: 'notice', lines: ['No one', 'under ' + fmt(n), 'permitted'] }),
+      text: () => `Ages of people who are NOT allowed in.` },
+    { sign: '>=', clue: 'at least', values: [18, 21], step: 1, nonneg: true, v: 'a', vn: 'age', noun: 'Ages', unit: ' years old', yes: 'allowed in', no: 'not allowed in',
+      plate: n => ({ type: 'reg', lines: ['Must be', 'at least', '!' + fmt(n), 'to enter'] }),
+      text: () => `Ages of people who are allowed in.` },
+    { sign: '<', clue: 'NOT allowed', values: [18, 21], step: 1, nonneg: true, v: 'a', vn: 'age', noun: 'Ages', unit: ' years old', yes: 'not allowed in', no: 'allowed in',
+      plate: n => ({ type: 'reg', lines: ['Must be', 'at least', '!' + fmt(n), 'to enter'] }),
+      text: () => `Ages of people who are NOT allowed in.` },
+    { sign: '<', clue: 'under 13', values: [13], step: 1, nonneg: true, v: 'a', vn: 'age', noun: 'Ages', unit: ' years old', yes: 'should not watch alone', no: 'can watch alone',
+      text: n => `PG-13 means some parts may not be right for kids under ${fmt(n)}. Ages of kids who should NOT watch without a parent.` }
+  );
+  // Counting situations: only whole numbers make sense
+  const WHOLE = ['strikes', 'cookies', 'fans', 'members', 'students', 'items', 'people', 'kids', 'votes', 'toppings', 'books', 'jokes', 'marbles', 'strokes', 'points'];
+  T.forEach(t => {
+    const u = (t.unit || '').trim();
+    if (!t.note && WHOLE.includes(u)) t.note = () => `Only whole numbers make sense here, since you can't have half of one of the ${u}. The graph shows every number that fits the rule.`;
+  });
+
+  // ---------- Real-life graph for each situation (same order as T) ----------
+  // kind: whole = separate dots, zero = stops at 0, max = stops at a real top value,
+  //       up / down = the line fades out because real life has a limit the rule doesn't name,
+  //       note = the math graph is already realistic; just a caption
+  const SOLID = 'can be any amount, so the line is solid';
+  const AGE = "Ages aren't only whole birthdays (someone can be 12½), so the line is solid";
+  const REAL = {
+    0: { kind: 'whole', cap: 'Lightning strikes are counted one at a time, so the answer is separate dots. They fade out because there is a real limit, even though the rule doesn’t say where.' },
+    1: { kind: 'up', cap: `Height ${SOLID}. It fades out because people only grow so tall.` },
+    2: { kind: 'note', cap: `Temperature ${SOLID}. (Water boils at 100°C at sea level. On a tall mountain it boils at a lower temperature.)` },
+    3: { kind: 'up', cap: `Temperature ${SOLID}. It fades out because the generator also has a hottest temperature it can handle.` },
+    4: { kind: 'up', cap: `Time ${SOLID}. It fades out because there are only so many hours in a lifetime.` },
+    5: { kind: 'up', cap: `Speed ${SOLID}. It fades out because this road also has a speed limit.` },
+    6: { kind: 'up', cap: `${AGE}. It fades out because people only live so long.` },
+    7: { kind: 'whole', cap: 'Grandma bakes whole cookies, so the answer is separate dots. They fade out because she can’t bake a trillion cookies, but the rule doesn’t say where she stops.' },
+    8: { kind: 'up', cap: `Weight ${SOLID}. It fades out because zip lines also have a top weight limit.` },
+    9: { kind: 'whole', cap: 'Fans are whole people, so the answer is separate dots. They fade out because the stadium only holds so many people.' },
+    10: { kind: 'whole', cap: 'Band members are whole people, so the answer is separate dots. They fade out because real bands only get so big.' },
+    12: { kind: 'zero', open0: true, cap: `Length ${SOLID}. It stops just above 0 because a bag has to have some length.` },
+    13: { kind: 'whole', cap: 'Students are whole people, so the answer is separate dots.' },
+    14: { kind: 'whole', cap: 'Items are counted one at a time, so the answer is separate dots.' },
+    15: { kind: 'whole', cap: 'People are counted in whole numbers, so the answer is separate dots.' },
+    16: { kind: 'zero', cap: `Speed ${SOLID}. It stops at 0 because a car can’t go slower than stopped.` },
+    17: { kind: 'zero', cap: `Weight ${SOLID}. It stops at 0 because an empty elevator holds 0 pounds.` },
+    18: { kind: 'zero', cap: `Weight ${SOLID}. It stops at 0 because nothing weighs less than 0 tons.` },
+    19: { kind: 'zero', cap: `${AGE}. It stops at 0 because no one is younger than 0.` },
+    20: { kind: 'whole', cap: 'Kids are whole people, so the answer is separate dots.' },
+    21: { kind: 'zero', cap: `${AGE}. It stops at 0 because no one is younger than 0.` },
+    22: { kind: 'zero', open0: true, cap: `Width ${SOLID}. It stops just above 0 because a photo has to have some width.` },
+    23: { kind: 'down', cap: `Depth ${SOLID}. It fades out on the left because a submarine can only dive so deep.` },
+    24: { kind: 'up', cap: `${AGE}. It fades out because people only live so long.` },
+    25: { kind: 'up', cap: `${AGE}. It fades out because people only live so long.` },
+    26: { kind: 'up', cap: 'Prices can include cents, so the line is solid. It fades out because no real order costs a trillion dollars.' },
+    27: { kind: 'max', max: 4, cap: 'GPA can be any amount, like 3.25, so the line is solid. On a 4.0 scale it can’t go above 4.0, so the line stops there.' },
+    28: { kind: 'max', max: 100, cap: 'Scores can’t go above 100, so the line stops at 100.' },
+    29: { kind: 'up', cap: `Body temperature ${SOLID}. It fades out because a body can only get so hot.` },
+    30: { kind: 'up', cap: 'Money can include cents, so the line is solid. It fades out because a class can only raise so much.' },
+    31: { kind: 'up', cap: `Temperature ${SOLID}. It fades out on the right because a winter jacket is too hot to wear in warm weather.` },
+    32: { kind: 'whole', cap: 'Points are whole numbers, so the answer is separate dots. They fade out because a team can only score so many points in one game.' },
+    33: { kind: 'up', cap: `Speed ${SOLID}. It fades out because cars only go so fast.` },
+    34: { kind: 'up', cap: `Weight ${SOLID}. It fades out because airlines also have a top weight they will take.` },
+    35: { kind: 'note', cap: `Temperature ${SOLID}. (32°F is the same as 0°C.)` },
+    36: { kind: 'whole', max: n => 2 * n, cap: n => `Votes are whole numbers, and there are only ${fmt(2 * n)} voters, so the dots stop at ${fmt(2 * n)}.` },
+    37: { kind: 'up', cap: `Data can be any amount, like 5.5 GB, so the line is solid. It fades out because you can only use so much in a month.` },
+    38: { kind: 'up', cap: `Temperature ${SOLID}. It fades out because air temperatures only get so hot.` },
+    39: { kind: 'zero', cap: `Time can be any amount, like 1½ hours, so the line is solid. It stops at 0 because you can’t have less than 0 hours.` },
+    40: { kind: 'whole', cap: 'Characters are counted one at a time, so the answer is separate dots.' },
+    41: { kind: 'zero', cap: 'Prices can include cents, like $24.99, so the line is solid. It stops at $0.' },
+    42: { kind: 'whole', cap: 'You choose whole toppings, so the answer is separate dots (0 toppings means plain cheese).' },
+    43: { kind: 'down', cap: `Temperature ${SOLID}. It fades out on the left because a freezer can only get so cold.` },
+    44: { kind: 'whole', cap: 'Students are whole people, so the answer is separate dots.' },
+    45: { kind: 'zero', cap: `Liquid ${SOLID}. It stops at 0 because you can’t have less than 0 ounces.` },
+    46: { kind: 'whole', cap: 'Books are counted one at a time, so the answer is separate dots.' },
+    47: { kind: 'zero', cap: `${AGE}. It stops at 0 because no one is younger than 0.` },
+    48: { kind: 'zero', cap: 'Battery level can be any amount from 0% to 100%, so the line is solid and stops at 0%.' },
+    49: { kind: 'whole', cap: 'Strokes are whole numbers, so the answer is separate dots. (No one can finish 18 holes in fewer than 18 strokes.)' },
+    50: { kind: 'down', cap: `Time ${SOLID}. It fades out on the left because no one can run a mile that fast (the world record is about 3 minutes 43 seconds).` },
+    51: { kind: 'down', cap: `Temperature ${SOLID}. It fades out on the left because real temperatures only get so cold.` },
+    52: { kind: 'down', cap: `Depth ${SOLID}. It fades out on the left because the ocean is only so deep (the deepest spot is about 11,000 meters down).` },
+    53: { kind: 'down', cap: 'Balances can include cents, so the line is solid. It fades out on the left because a bank only lets an account go so far below $0.' },
+    54: { kind: 'down', cap: `Height ${SOLID}. It fades out on the left because even babies are about 20 inches long.` },
+    55: { kind: 'whole', cap: 'Jokes are counted one at a time, so the answer is separate dots. They fade out because dinner has to end sometime.' },
+    56: { kind: 'up', cap: `Fish length ${SOLID}. It fades out because snapper only grow so long.` },
+    57: { kind: 'up', cap: `Distance ${SOLID}. It fades out because once you're far enough back, you aren't following the truck anymore.` },
+    58: { kind: 'whole', cap: 'People are counted in whole numbers, so the answer is separate dots.' },
+    59: { kind: 'whole', cap: 'People are counted in whole numbers, so the answer is separate dots.' },
+    60: { kind: 'whole', cap: 'Axles are whole numbers, so the answer is separate dots. They fade out because real vehicles only have so many axles.' },
+    61: { kind: 'up', cap: `Time ${SOLID}. It fades out because the event ends eventually.` },
+    62: { kind: 'whole', cap: 'Marbles are counted one at a time, so the answer is separate dots.' },
+    63: { kind: 'zero', cap: `${AGE}. It stops at 0 because no one is younger than 0.` },
+    64: { kind: 'up', cap: `${AGE}. It fades out because people only live so long.` },
+    65: { kind: 'zero', cap: `${AGE}. It stops at 0 because no one is younger than 0.` },
+    66: { kind: 'zero', cap: `${AGE}. It stops at 0 because no one is younger than 0.` }
+  };
+  T.forEach((t, i) => { if (REAL[i]) t.rl = REAL[i]; });
+  // Every variable used anywhere, for the wrong-answer tiles
+  const ALLVARS = [...new Map(T.map(t => [t.v + '|' + t.vn, [t.v, t.vn]])).values()];
+
+  // Small pictures that match the parts of the graph
+  const SW = {
+    right: '<svg class="sw" viewBox="0 0 44 16" aria-hidden="true"><line x1="4" y1="8" x2="32" y2="8" class="sw-shade"/><path d="M42 8 L30 1 L30 15 Z" class="sw-head"/></svg>',
+    left: '<svg class="sw" viewBox="0 0 44 16" aria-hidden="true"><line x1="12" y1="8" x2="40" y2="8" class="sw-shade"/><path d="M2 8 L14 1 L14 15 Z" class="sw-head"/></svg>',
+    open: '<svg class="sw" viewBox="0 0 44 16" aria-hidden="true"><line x1="2" y1="8" x2="42" y2="8" class="sw-axis"/><circle cx="22" cy="8" r="6" class="sw-open"/></svg>',
+    closed: '<svg class="sw" viewBox="0 0 44 16" aria-hidden="true"><line x1="2" y1="8" x2="42" y2="8" class="sw-axis"/><circle cx="22" cy="8" r="6" class="sw-closed"/></svg>',
+    plain: '<svg class="sw" viewBox="0 0 44 16" aria-hidden="true"><line x1="2" y1="8" x2="42" y2="8" class="sw-axis"/></svg>'
+  };
+  function explainGraph(it) {
+    const t = it.t, b = fmt(it.b), sg = t.sign;
+    const shaded = { '<': `less than ${b}`, '<=': `${b} or less`, '>': `more than ${b}`, '>=': `${b} or more` }[sg];
+    const other = sg[0] === '<' ? `more than ${b}` : `less than ${b}`;
+    const closed = sg.includes('=');
+    const row = (sw, label, text) => `<div class="ex-row">${sw}<div><span class="ex-label">${label}</span> ${text}</div></div>`;
+    return `<div class="ex-head"><code>${esc(answerStr(it))}</code></div>` +
+      row(sg[0] === '>' ? SW.right : SW.left, 'Shaded:', `${esc(t.noun)} ${shaded}: <b class="yes">${esc(t.yes)}</b>.`) +
+      row(closed ? SW.closed : SW.open, closed ? 'Closed circle:' : 'Open circle:', `Exactly ${b}${esc(t.unit)}: <b class="${closed ? 'yes' : 'no'}">${esc(closed ? t.yes : t.no)}</b>.`) +
+      row(SW.plain, 'Not shaded:', `${esc(t.noun)} ${other}: <b class="no">${esc(t.no)}</b>.`);
+  }
+
+  const MEANING = {
+    '>=': (c, b) => `"${c}" means ${b} counts, and so does every number greater than ${b}.`,
+    '>': (c, b) => `"${c}" means numbers greater than ${b}, but not ${b} itself.`,
+    '<=': (c, b) => `"${c}" means ${b} counts, and so does every number less than ${b}.`,
+    '<': (c, b) => `"${c}" means numbers less than ${b}, but not ${b} itself.`
+  };
+  const GRAPH = {
+    '>=': b => `closed circle, right`, '>': b => `open circle, right`,
+    '<=': b => `closed circle, left`, '<': b => `open circle, left`
+  };
+
+  const state = { items: [], i: 0 };
+  const N_TICKS = 11;
+
+  const GOAL = 30;
+  // Google Form that collects results (same form as the Distributive Property drill).
+  // Left empty on the claude.ai page, where sending to other sites is blocked; the downloaded copy fills it in.
+  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe4_Gnrq1zyrttA3lSgrVBtMkaVaoMim31ByzoH-orxmfDB2A/formResponse';
+  const DRILL_NAME = 'Inequalities: Write It, Graph It';
+  function makeItem(t) {
+    const b = pick(t.values);
+    // boundary lands on tick 2..8, keeping the whole line within the problem's min/max
+    const lo = t.min ?? (t.nonneg ? 0 : -Infinity), hi = t.max ?? Infinity;
+    const fits = k => b - k * t.step >= lo - 1e-9 && b + (N_TICKS - 1 - k) * t.step <= hi + 1e-9;
+    let ks = [2, 3, 4, 5, 6, 7, 8].filter(fits);
+    if (!ks.length) ks = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(fits);
+    const k = ks.length ? pick(ks) : 5;
+    const start = +(b - k * t.step).toFixed(2);
+    const r = v => +v.toFixed(2);
+    const pool = [b, r(b - t.step), r(b + t.step), b < 0 ? -b : r(b + 2 * t.step)];
+    const choices = shuffle([...new Set(pool)]);
+    const others = shuffle(ALLVARS.slice()).filter(([l, m]) => l !== t.v && m !== t.vn);
+    const vch = [[t.v, t.vn]];
+    for (const o of others) { if (vch.length >= 4) break; if (!vch.some(([l, m]) => l === o[0] || m === o[1])) vch.push(o); }
+    const vchoices = shuffle(vch);
+    return { t, b, start, choices, vchoices, sel: { v: null, s: null, n: null }, wrong: { v: [], s: [], n: [] }, g: { p: null, c: null, d: null }, drag: null, aOk: false, miss: false, revealed: false, done: false, fbA: null, fbG: null };
+  }
+  // Next problem: use the sign with the fewest correct answers so far (ties: fewest shown, then random),
+  // so the correct answers stay even across >, <, ≥ and ≤. Situations used in the last 30 problems are avoided when possible.
+  const SIGNS = ['>=', '>', '<=', '<'];
+  function addOne() {
+    const tally = sg => ({
+      right: state.items.filter(x => x.t.sign === sg && x.done && !x.miss).length,
+      shown: state.items.filter(x => x.t.sign === sg).length
+    });
+    const ranked = shuffle(SIGNS.slice()).map(sg => ({ sg, ...tally(sg) }))
+      .sort((p, q) => p.right - q.right || p.shown - q.shown);
+    const sg = ranked[0].sg;
+    const recent = state.items.slice(-30).map(x => x.t);
+    const pool = T.filter(t => t.sign === sg);
+    const fresh = pool.filter(t => !recent.includes(t));
+    const t = fresh.length ? pick(fresh) : pool.reduce((best, t) => recent.lastIndexOf(t) < recent.lastIndexOf(best) ? t : best, pool[0]);
+    state.items.push(makeItem(t));
+  }
+  const correctCount = () => state.items.filter(x => x.done && !x.miss).length;
+  function startDrill() {
+    state.items = []; state.i = 0; state.finished = false; state.autoShown = false;
+    state.form = state.form || { period: '', last: '', first: '' };
+    state.submitted = false; state.submittedAt = 0; state.note = '';
+    addOne();
+    renderAll();
+  }
+  function goNext() {
+    if (state.finished) return;
+    // reaching the goal opens the turn-in page once; after that they can keep practicing
+    if (correctCount() >= GOAL && !state.autoShown) { state.autoShown = true; openTurnIn(); return; }
+    if (state.i >= state.items.length - 1) addOne();
+    state.i++;
+    renderAll();
+  }
+  const cur = () => state.items[state.i];
+  const tickVal = (it, i) => +(it.start + i * it.t.step).toFixed(2);
+  const bIndex = it => Math.round((it.b - it.start) / it.t.step);
+  const answerStr = it => `${it.t.v} ${SYM[it.t.sign]} ${fmt(it.b)}`;
+
+  // ---------- Checking ----------
+  const phaseOf = it => it.sel.v === null ? 'v' : it.sel.s === null ? 's' : it.sel.n === null ? 'n' : 'graph';
+  function pickPart(kind, raw) {
+    const it = cur(), t = it.t;
+    if (it.aOk || phaseOf(it) !== kind) return;
+    let ok, msg = '';
+    if (kind === 'v') {
+      ok = raw === t.v;
+      if (!ok) msg = 'What is being measured?';
+    } else if (kind === 's') {
+      ok = raw === t.sign;
+      if (!ok) msg = raw[0] === t.sign[0]
+        ? `Close. Does ${fmt(it.b)} count? Clue: "${esc(t.clue)}"`
+        : `Wrong way. Clue: "${esc(t.clue)}"`;
+    } else {
+      const nv = +raw;
+      ok = Math.abs(nv - it.b) < 1e-9;
+      if (!ok) msg = Math.abs(nv + it.b) < 1e-9
+        ? 'Check the sign of the number.'
+        : 'Reread the situation.';
+    }
+    if (ok) {
+      it.sel[kind] = kind === 'n' ? +raw : raw;
+      if (kind === 'n') { it.aOk = true; it.fbA = { ok: true, msg: 'Correct!' }; }
+      else it.fbA = null;
+    } else {
+      it.wrong[kind].push(raw); it.miss = true; it.fbA = { ok: false, msg };
+    }
+    renderAll(true);
+    if (it.aOk) { const sg = $('#step-graph'); if (sg && sg.scrollIntoView) sg.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+  }
+  function evalGraph(it) {
+    const g = it.g, sign = it.t.sign, b = fmt(it.b);
+    if (g.p === null) return { ok: false, msg: 'Place the circle.' };
+    if (g.p !== bIndex(it)) return { ok: false, msg: 'Circle is on the wrong number.' };
+    const wantClosed = sign.includes('='), wantRight = sign[0] === '>';
+    if (g.c === null) return { ok: false, msg: 'Open or closed?' };
+    if ((g.c === 'closed') !== wantClosed) return { ok: false, msg: wantClosed ? `Closed: ${b} counts.` : `Open: ${b} doesn't count.` };
+    if (g.d === null) return { ok: false, msg: 'Draw the arrow.' };
+    if ((g.d === 'right') !== wantRight) return { ok: false, msg: 'Arrow points the wrong way.' };
+    return { ok: true, msg: 'Correct!' };
+  }
+  function checkGraph() {
+    const it = cur();
+    if (!it.aOk) return;
+    const g = evalGraph(it);
+    it.fbG = g;
+    if (g.ok) { it.done = true; if (it.miss) g.sub = "Had a mistake, so this one doesn't count."; }
+    else if (!it.done) it.miss = true;
+    renderAll(true);
+  }
+  function reveal() {
+    const it = cur();
+    if (!it.aOk) {
+      it.sel = { v: it.t.v, s: it.t.sign, n: it.b };
+      it.aOk = true; it.revealed = true; it.miss = true;
+      it.fbA = { ok: true, msg: `<code>${esc(answerStr(it))}</code>` };
+    } else if (!it.done) {
+      it.g = { p: bIndex(it), c: it.t.sign.includes('=') ? 'closed' : 'open', d: it.t.sign[0] === '>' ? 'right' : 'left' };
+      it.done = true; it.revealed = true; it.miss = true;
+      it.fbG = null;
+    }
+    renderAll(true);
+  }
+
+  // ---------- Rendering ----------
+  function status(it) {
+    if (it.done && !it.miss) return 'right';
+    if (it.done && it.miss) return 'fixed';
+    if (it.miss) return 'miss';
+    return '';
+  }
+  function renderHeader() {
+    $('#banner').innerHTML = '';
+  }
+  function openTurnIn() { state.finished = true; state.note = ''; renderAll(); }
+  function closeTurnIn() { state.finished = false; if (cur().done) goNext(); else renderAll(); }
+  function triedCount() { return state.items.filter(x => x.done || x.miss).length; }
+  function renderFinish() {
+    const n = correctCount(), tried = triedCount(), f = state.form;
+    const more = state.submitted && n > state.submittedAt;
+    const early = n < GOAL;
+    const showForm = !state.submitted || more;
+    $('#card').innerHTML = `<section class="turnin" role="dialog" aria-labelledby="ti-title">
+      <div class="ti-top">
+        ${early ? '' : '<div class="big-check" aria-hidden="true">✓</div>'}
+        <div>
+          <h2 id="ti-title" class="${early ? 'early' : ''}">${early ? 'Turn in early' : `${n} correct!`}</h2>
+          <p class="ti-sub">${early ? `${n} of ${GOAL} correct. ` : ''}${tried} problems tried. ${showForm ? 'Enter your period and name to turn in.' : ''}</p>
+        </div>
+      </div>
+      <iframe name="hidden_iframe" id="hidden_iframe" title="Sending" style="display:none"></iframe>
+      <form id="gform" ${FORM_URL ? `action="${FORM_URL}" method="POST" target="hidden_iframe"` : ''} ${showForm ? '' : 'hidden'}>
+        <div class="ti-warn">Last name in the <b>Last name</b> box, first name in the <b>First name</b> box. Swapped names count as missing.</div>
+        <div class="ti-fields">
+          <div class="ti-field ti-period"><label for="studentPeriod"><span class="ti-num">1</span>Period</label>
+            <input type="number" id="studentPeriod" placeholder="e.g. 3" min="1" max="10" required value="${esc(f.period)}"></div>
+          <div class="ti-field"><label for="lastName"><span class="ti-num">2</span>LAST name</label>
+            <input type="text" id="lastName" placeholder="Rodriguez" autocomplete="family-name" required value="${esc(f.last)}"></div>
+          <div class="ti-field"><label for="firstName"><span class="ti-num">3</span>FIRST name</label>
+            <input type="text" id="firstName" placeholder="Maria" autocomplete="given-name" required value="${esc(f.first)}"></div>
+        </div>
+        <div class="ti-check" id="nameCheck"></div>
+        <input type="hidden" id="studentName" name="entry.1899284808" value="">
+        <input type="hidden" id="formScore" name="entry.1974610095" value="">
+        <button type="submit" class="btn primary ti-btn" id="ti-submit">${more ? 'Send updated results' : 'Submit results'}</button>
+      </form>
+      <p class="ti-feedback" id="ti-feedback">${state.note || (more ? `You turned in ${state.submittedAt}. Send again to update to ${n}.` : '')}</p>
+      <div class="ti-after"><button class="btn" type="button" id="ti-back">${early ? 'Back to the problems' : 'Keep practicing'}</button></div>
+    </section>`;
+    const nameCheck = () => {
+      const ln = $('#lastName').value.trim(), fn = $('#firstName').value.trim();
+      const row = (t, v) => `<div class="r"><span class="t">${t}</span><span class="v${v ? '' : ' empty'}">${v ? esc(v) : '—'}</span></div>`;
+      $('#nameCheck').innerHTML = '<div class="hd">Check your name:</div>' + row('Last name', ln) + row('First name', fn) + row('Roll call', ln && fn ? ln + ', ' + fn : '');
+    };
+    nameCheck();
+    [['studentPeriod', 'period'], ['lastName', 'last'], ['firstName', 'first']].forEach(([id, k]) =>
+      $('#' + id).addEventListener('input', e => { state.form[k] = e.target.value; nameCheck(); }));
+    $('#hidden_iframe').addEventListener('load', () => {
+      if (!state.sending) return;
+      state.sending = false;
+      state.note = '<span class="ok">Submitted. Your teacher has your results.</span>';
+      renderAll();
+    });
+    $('#gform').addEventListener('submit', e => {
+      const ln = $('#lastName').value.trim(), fn = $('#firstName').value.trim(), pd = $('#studentPeriod').value.trim();
+      $('#studentName').value = `Period ${pd} — ${ln} — ${fn} — ${correctCount()} correct on the first try — ${DRILL_NAME} (${triedCount()} problems)`;
+      $('#formScore').value = correctCount();
+      if (!FORM_URL) {
+        e.preventDefault();
+        $('#ti-feedback').innerHTML = '<span class="nt">This is a preview. Turning in works in the downloaded copy of the drill.</span>';
+        return;
+      }
+      state.submitted = true; state.submittedAt = correctCount(); state.sending = true;
+      $('#ti-feedback').textContent = 'Sending…';
+    });
+    $('#ti-back').addEventListener('click', closeTurnIn);
+    if (showForm) setTimeout(() => { const el = $(f.period ? (f.last ? (f.first ? '#ti-submit' : '#firstName') : '#lastName') : '#studentPeriod'); if (el) el.focus(); }, 50);
+  }
+  function plateHTML(p) {
+    if (!p) return '';
+    let lines = p.lines.map(l => l[0] === '!' ? `<span class="big">${esc(l.slice(1))}</span>` : `<span class="ln">${esc(l)}</span>`).join('');
+    if (p.type === 'notice') lines = `<span class="band">Notice</span>` + lines;
+    return `<div class="plate plate-${p.type}" role="img" aria-label="Sign: ${esc(p.lines.map(l => l.replace('!', '')).join(' '))}"><div class="plate-in">${lines}</div></div>`;
+  }
+  const SIGN_TILES = [['>', '&gt;', 'greater than'], ['<', '&lt;', 'less than'], ['>=', '≥', 'greater or equal'], ['<=', '≤', 'less or equal']];
+  function askHTML(it) {
+    const ph = phaseOf(it);
+    const isWrong = (k, val) => it.wrong[k].some(w => k === 'n' ? Math.abs(+w - +val) < 1e-9 : w === val);
+    const tile = (k, val, inner) => { const w = isWrong(k, val); return `<button type="button" class="tile${w ? ' wrong' : ''}" data-${k}="${esc(val)}" ${w ? 'disabled' : ''}>${inner}</button>`; };
+    const q = (part, text, tiles) => `<div class="ask"><p class="ask-q">${text}</p><div class="tiles" role="group" aria-label="${esc(text)}">${tiles.join('')}</div></div>`;
+    if (ph === 'v') return q('', 'Variable?',
+      it.vchoices.map(([l, m]) => tile('v', l, `${l}<small>${esc(m)}</small>`)));
+    if (ph === 's') return q('', 'Sign?',
+      SIGN_TILES.map(([v, sym, cap]) => tile('s', v, sym)));
+    if (ph === 'n') return q('', 'Number?',
+      it.choices.map(n => tile('n', String(n), fmt(n))));
+    return '';
+  }
+  function renderCard() {
+    const it = cur(), t = it.t, st = status(it);
+    const chip = st === 'right' ? '<span class="chip right">Correct</span>' : st === 'fixed' ? `<span class="chip right">${it.revealed ? 'Answer shown' : 'Fixed'}</span>` : st === 'miss' ? '<span class="chip miss">Try again</span>' : '<span class="chip">Not checked</span>';
+    $('#card').innerHTML = `
+    <article class="card">
+      <div class="scenario">
+        ${plateHTML(t.plate && t.plate(it.b))}
+        <div class="scn-text">
+          <p class="situation">${esc(t.text(it.b))}</p>
+        </div>
+      </div>
+      <section class="step" id="step-write" ${it.done ? 'hidden' : ''}>
+        <div class="step-head">
+          <h3><span class="stepno">1</span>Write it</h3>
+          <div class="expr" id="expr" aria-live="polite"><span class="slot" id="slot-v"></span><span class="slot" id="slot-s"></span><span class="slot" id="slot-n"></span></div>
+          <p class="fb" id="fb-a"></p>
+        </div>
+        ${askHTML(it)}
+      </section>
+      <section class="step" id="step-graph" ${it.aOk ? '' : 'hidden'}>
+        <div class="step-head">
+          <h3><span class="stepno">2</span>Graph it</h3>
+          ${it.done ? `<div class="expr ok mini"><span class="slot">${esc(it.t.v)}</span><span class="slot">${SYM[it.t.sign]}</span><span class="slot">${fmt(it.b)}</span></div>` : ''}
+          <p class="fb" id="fb-g"></p>
+        </div>
+        <div class="line-wrap"><svg id="nl" viewBox="0 0 600 100" preserveAspectRatio="xMidYMid meet" tabindex="0" role="img" aria-label="Number line. Click a number to place the circle, move the pointer left or right, and click again to set the arrow. Keyboard: arrow keys move the circle, Shift plus arrow sets the direction, Space switches open and closed."></svg></div>
+        <div class="graph-row" ${it.done ? 'hidden' : ''}>
+          <div class="seg" role="group" aria-label="Circle type">
+            <button type="button" data-c="open">○ Open</button><button type="button" data-c="closed">● Closed</button></div>
+          <button type="button" class="linkbtn" id="clear">Clear</button>
+          <span class="spacer"></span>
+          <button type="button" class="btn primary" id="check-g" ${it.aOk && !it.done ? '' : 'disabled'}>Check graph</button>
+        </div>
+        ${it.done ? `<p class="graph-cap"><b>Math graph:</b> <span class="long">this is the graph of the math inequality </span><code>${esc(answerStr(it))}</code>.</p>` : ''}
+        ${it.done && realKind(t) ? `<div class="real"><svg id="rl" viewBox="0 0 600 64" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Real-life graph"></svg><p class="real-cap"></p></div>` : ''}
+      </section>
+      <div class="why" id="why"></div>
+      <div class="actions">
+        <span class="spacer"></span>
+        <button type="button" class="btn" id="prev" ${state.i === 0 ? 'disabled' : ''}>← Back</button>
+        <span class="goal" title="Correct on the first try">
+          <span class="goal-bar"><span style="width:${Math.min(100, correctCount() / GOAL * 100)}%"></span></span>
+          <span class="count"><b>${correctCount()}</b>${correctCount() >= GOAL ? '' : ` / ${GOAL}`} correct</span>
+        </span>
+        <button type="button" class="btn turnin-btn" id="turnin-btn">Turn in</button>
+      </div>
+    </article>`;
+    bindCard();
+    paintCard();
+  }
+  function paintCard() {
+    const it = cur();
+    const ex = $('#expr');
+    const fa = $('#fb-a'), fg = $('#fb-g');
+    fa.className = 'fb'; fg.className = 'fb'; fa.innerHTML = ''; fg.innerHTML = ''; ex.className = 'expr';
+    if (it.fbA && !it.done) {
+      fa.innerHTML = it.fbA.ok ? `<span class="ok-badge">✓</span><span>${it.fbA.msg}</span>` : '✗ ' + it.fbA.msg; fa.classList.add(it.fbA.ok ? 'ok' : 'no');
+      ex.classList.add(it.fbA.ok ? 'ok' : 'no');
+    }
+    if (it.fbG) {
+      fg.innerHTML = it.fbG.ok
+        ? `<span class="ok-badge">✓</span><span>${it.fbG.msg}${it.fbG.sub ? `<small class="fb-sub">${it.fbG.sub}</small>` : ''}</span><span class="go-next"><span class="kb">Press Enter or click here</span><span class="touch">Tap here</span> for the next problem →</span>`
+        : '✗ ' + it.fbG.msg;
+      fg.classList.add(it.fbG.ok ? 'ok' : 'no');
+      if (it.done) { fg.setAttribute('role', 'button'); fg.tabIndex = 0; } else { fg.removeAttribute('role'); fg.removeAttribute('tabindex'); }
+    }
+    $('#nl').setAttribute('tabindex', it.aOk ? '0' : '-1');
+    const ph = phaseOf(it);
+    const setSlot = (id, val, k) => { const el = $(id); el.textContent = val === null ? '?' : val; el.className = 'slot' + (val === null ? ' empty' : '') + (ph === k ? ' current' : ''); };
+    setSlot('#slot-v', it.sel.v, 'v');
+    setSlot('#slot-s', it.sel.s ? SYM[it.sel.s] : null, 's');
+    setSlot('#slot-n', it.sel.n !== null ? fmt(it.sel.n) : null, 'n');
+    const t = it.t, b = fmt(it.b);
+    $('#why').innerHTML = '';
+    document.querySelectorAll('[data-c]').forEach(x => x.setAttribute('aria-pressed', String(it.g.c === x.dataset.c)));
+    drawReal();
+    drawLine();
+  }
+
+  // ---------- "In real life" graph shown after a problem is solved ----------
+  function realKind(t) { return t.rl ? t.rl.kind : null; }
+  const NICE = [0.1, 0.2, 0.25, 0.5, 1, 2, 2.5, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000];
+  function niceRange(lo, hi) {
+    for (const st of NICE) {
+      const s0 = Math.floor(lo / st + 1e-9) * st;
+      if (s0 + 10 * st >= hi - 1e-9) return { s0: +s0.toFixed(2), st };
+    }
+    return { s0: lo, st: (hi - lo) / 10 };
+  }
+  function drawReal() {
+    const it = cur(), host = $('.real');
+    if (!host) return;
+    const t = it.t, rl = t.rl, kind = rl.kind, b = it.b, right = t.sign[0] === '>', incl = t.sign.includes('=');
+    const cap = $('.real-cap'), svg = $('#rl');
+    let text = typeof rl.cap === 'function' ? rl.cap(b) : rl.cap;
+    if (kind === 'note') { svg.style.display = 'none'; cap.innerHTML = `<b>Real-life graph:</b> ${esc(text)}`; return; }
+    const H = 64, r = svg.getBoundingClientRect();
+    const W = r.width > 0 ? Math.max(420, Math.round(H * r.width / r.height)) : 600;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const y = 26, x0 = 40, x1 = W - 40;
+    const max = typeof rl.max === 'function' ? rl.max(b) : rl.max;
+    let s0, st;
+    if (kind === 'whole') {
+      if (max !== undefined) {
+        // show the boundary and the top value together
+        st = max - b <= 8 ? 1 : 2;
+        s0 = Math.max(0, max - 10 * st + st);
+      } else { st = 1; s0 = Math.max(0, Math.round(b) - 5); }
+    } else if (kind === 'zero') ({ s0, st } = niceRange(0, b * 1.3 + 1e-9));
+    else if (kind === 'max') ({ s0, st } = niceRange(Math.max(0, b - (max - b) * 0.8), max));
+    else { s0 = it.start; st = it.t.step; }
+    const X = v => x0 + (v - s0) / (10 * st) * (x1 - x0);
+    const vEnd = s0 + 10 * st;
+    let h = `<defs>
+      <linearGradient id="fadeR" x1="0" x2="1" y1="0" y2="0"><stop offset="0" class="gs1"/><stop offset="1" class="gs0"/></linearGradient>
+      <linearGradient id="fadeL" x1="1" x2="0" y1="0" y2="0"><stop offset="0" class="gs1"/><stop offset="1" class="gs0"/></linearGradient></defs>`;
+    h += `<line x1="10" y1="${y}" x2="${W - 10}" y2="${y}" class="axis"/>`;
+    for (let i = 0; i <= 10; i++) {
+      const v = +(s0 + i * st).toFixed(2), tx = X(v);
+      h += `<line x1="${tx}" y1="${y - 6}" x2="${tx}" y2="${y + 6}" class="tick"/><text x="${tx}" y="${y + 26}" class="tlabel">${fmt(v)}</text>`;
+    }
+    const endDot = (v, closed) => `<circle cx="${X(v)}" cy="${y}" r="8" class="rend ${closed ? 'closed' : 'open'}"/>`;
+    if (kind === 'whole') {
+      const inSet = v => (right ? (incl ? v >= b : v > b) : (incl ? v <= b : v < b)) && v >= 0 && (max === undefined || v <= max);
+      const dots = [];
+      for (let v = s0; v <= vEnd; v++) if (inSet(v)) dots.push(v);
+      const fade = right && max === undefined;
+      dots.forEach((v, k) => {
+        const fromEnd = dots.length - 1 - k;
+        const op = fade && fromEnd < 4 ? (0.25 + fromEnd * 0.2).toFixed(2) : 1;
+        h += `<circle cx="${X(v)}" cy="${y}" r="7" class="rdot" style="opacity:${op}"/>`;
+      });
+      if (!right && s0 > 0) { h += `<text x="${x0 - 32}" y="${y + 6}" class="more">…</text>`; text += ' The … means the dots keep going down to 0.'; }
+    } else if (kind === 'zero') {
+      h += `<line x1="${X(0)}" y1="${y}" x2="${X(b)}" y2="${y}" class="rseg"/>` + endDot(0, !rl.open0) + endDot(b, incl);
+    } else if (kind === 'max') {
+      h += `<line x1="${X(b)}" y1="${y}" x2="${X(max)}" y2="${y}" class="rseg"/>` + endDot(b, incl) + endDot(max, true);
+    } else if (kind === 'up') {
+      const a = X(b), e = x1 + 20;
+      h += `<rect x="${a}" y="${y - 3}" width="${e - a}" height="6" fill="url(#fadeR)"/>` + endDot(b, incl);
+    } else if (kind === 'down') {
+      const a = x0 - 20, e = X(b);
+      h += `<rect x="${a}" y="${y - 3}" width="${e - a}" height="6" fill="url(#fadeL)"/>` + endDot(b, incl);
+    }
+    svg.innerHTML = h;
+    cap.innerHTML = `<b>Real-life graph:</b> ${esc(text)}`;
+  }
+  // Number line geometry: viewBox height is 100; width W matches the box's shape so nothing is letterboxed
+  const GEO = { W: 600, x0: 50, dx: 50 };
+  const tickX = i => GEO.x0 + i * GEO.dx;
+  function sizeLine(svg, H) {
+    const r = svg.getBoundingClientRect();
+    const W = r.width > 0 && r.height > 0 ? Math.max(420, Math.round(H * r.width / r.height)) : 600;
+    GEO.W = W; GEO.x0 = 50; GEO.dx = (W - 100) / (N_TICKS - 1);
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  }
+  // Wrap a label into at most 3 lines that fit maxW (rough width estimate per character)
+  function fitLabel(text, maxW) {
+    const words = text.split(' ');
+    for (let fs = 16; fs >= 10; fs -= 0.5) {
+      const maxChars = Math.floor(maxW / (fs * 0.58));
+      const lines = []; let line = '';
+      let ok = true;
+      for (const w of words) {
+        if (w.length > maxChars) { ok = false; break; }
+        const next = line ? line + ' ' + w : w;
+        if (next.length <= maxChars) line = next; else { lines.push(line); line = w; }
+      }
+      if (line) lines.push(line);
+      if (ok && lines.length <= 3) return { lines, fs, w: Math.max(...lines.map(l => l.length)) * fs * 0.58 };
+    }
+    return { lines: [text], fs: 10, w: text.length * 10 * 0.58 };
+  }
+  // Dot label, rotated to read bottom-to-top: first column is the value, then the phrase wrapped into columns
+  function vertLabel(head, phrase) {
+    const fs = 13, maxChars = 15, lh = fs * 1.2;
+    const cols = [head]; let line = '';
+    for (const w of phrase.split(' ')) {
+      const next = line ? line + ' ' + w : w;
+      if (next.length <= maxChars) line = next; else { cols.push(line); line = w; }
+    }
+    if (line) cols.push(line);
+    const len = Math.max(...cols.map(c => c.length)) * fs * 0.58;
+    return { cols: cols.slice(0, 4), fs, lh, len, width: Math.min(4, cols.length) * lh };
+  }
+  function vertSVG(v, px, bottomY, cls) {
+    const n = v.cols.length;
+    return `<g transform="translate(${px} ${bottomY}) rotate(-90)"><text class="ann vert ${cls}" style="font-size:${v.fs}px">` +
+      v.cols.map((c, i) => `<tspan x="0" y="${((i - (n - 1) / 2) * v.lh + v.fs * 0.35).toFixed(1)}">${esc(c)}</tspan>`).join('') +
+      `</text></g>`;
+  }
+  function labelSVG(cx, fit, baseY, cls, W) {
+    const half = fit.w / 2;
+    const x = Math.max(half + 4, Math.min(W - half - 4, cx));
+    const lh = fit.fs * 1.15;
+    const top = baseY - (fit.lines.length - 1) * lh;
+    return `<text class="ann ${cls}" x="${x}" y="${top}" style="font-size:${fit.fs}px">` +
+      fit.lines.map((l, i) => `<tspan x="${x}" dy="${i ? lh : 0}">${esc(l)}</tspan>`).join('') + `</text>`;
+  }
+  function drawLine() {
+    const it = cur(), g = it.g, svg = $('#nl');
+    if (!svg) return;
+    const ann = it.done && g.p !== null;
+    const closedAns = it.t.sign.includes('=');
+    const vl = ann ? vertLabel(`${it.t.pre || ''}${fmt(it.b)}${it.t.unit}:`, closedAns ? it.t.yes : it.t.no) : null;
+    if (ann && it.vlen) vl.len = it.vlen;   // measured length from the last draw
+    const y = ann ? Math.max(110, Math.ceil(46 + vl.len + 10)) : 42;
+    const H = ann ? y + 58 : 100;
+    const lw = svg.parentNode, card = svg.closest('.card');
+    lw.style.height = `calc(${(H / 100).toFixed(3)} * clamp(104px, 11vw, 136px))`;
+    if (card && !lw.closest('[hidden]')) {
+      const over = card.scrollHeight - card.clientHeight;
+      if (over > 0) lw.style.height = Math.max(96, lw.offsetHeight - over) + 'px';
+    }
+    sizeLine(svg, H);
+    const W = GEO.W, R = W - 20, L = 20, mid = W / 2;
+    let h = `<line x1="14" y1="${y}" x2="${W - 14}" y2="${y}" class="axis"/>`;
+    h += `<path d="M4 ${y} L18 ${y - 8} L18 ${y + 8} Z" class="axis-head"/><path d="M${W - 4} ${y} L${W - 18} ${y - 8} L${W - 18} ${y + 8} Z" class="axis-head"/>`;
+    for (let i = 0; i < N_TICKS; i++) {
+      const tx = tickX(i);
+      h += `<line x1="${tx}" y1="${y - 9}" x2="${tx}" y2="${y + 9}" class="tick"/>`;
+      h += `<text x="${tx}" y="${y + 34}" class="tlabel">${fmt(tickVal(it, i))}</text>`;
+    }
+    if (g.p !== null && it.following && it.drag !== null) {
+      const px = tickX(g.p), ex = Math.max(L, Math.min(R, it.drag));
+      h += `<line x1="${px}" y1="${y}" x2="${ex}" y2="${y}" class="shade"/>`;
+      if (Math.abs(ex - px) > 14) {
+        const sg = ex > px ? 1 : -1;
+        h += `<path d="M${ex + sg * 14} ${y} L${ex - sg * 4} ${y - 12} L${ex - sg * 4} ${y + 12} Z" class="shade-head"/>`;
+      }
+    } else if (g.p !== null && g.d) {
+      const px = tickX(g.p);
+      if (g.d === 'right') h += `<line x1="${px}" y1="${y}" x2="${R}" y2="${y}" class="shade"/><path d="M${W - 2} ${y} L${W - 22} ${y - 12} L${W - 22} ${y + 12} Z" class="shade-head"/>`;
+      else h += `<line x1="${px}" y1="${y}" x2="${L}" y2="${y}" class="shade"/><path d="M2 ${y} L22 ${y - 12} L22 ${y + 12} Z" class="shade-head"/>`;
+    }
+    if (g.p !== null) {
+      const cls = g.c === 'closed' ? 'closed' : g.c === 'open' ? 'open' : 'unset';
+      h += `<circle cx="${tickX(g.p)}" cy="${y}" r="10" class="pt ${cls}"/>`;
+      if (it.following) h += `<text x="${mid}" y="16" class="hint">Click to set the arrow</text>`;
+      else if (!g.d) h += `<text x="${mid}" y="16" class="hint">Click the circle</text>`;
+    } else {
+      h += `<text x="${mid}" y="16" class="hint">Click a number</text>`;
+    }
+    if (ann) {
+      const t = it.t, px = tickX(g.p), right = t.sign[0] === '>', closed = closedAns;
+      const by = y - 46, gap = Math.max(16, vl.width / 2 + 10);
+      const shadeA = right ? px + gap : L, shadeB = right ? R : px - gap;
+      const restA = right ? 14 : px + gap, restB = right ? px - gap : W - 14;
+      const bracket = (a, b, cls) => b - a > 12 ? `<path d="M${a} ${by + 7} L${a} ${by} L${b} ${by} L${b} ${by + 7}" class="ann-br ${cls}"/>` : '';
+      h += bracket(shadeA, shadeB, 'yes') + bracket(restA, restB, 'no');
+      h += labelSVG((shadeA + shadeB) / 2, fitLabel('\u2713 ' + t.yes, Math.max(80, shadeB - shadeA)), by - 8, 'yes', W);
+      h += labelSVG((restA + restB) / 2, fitLabel('\u2717 ' + t.no, Math.max(80, restB - restA)), by - 8, 'no', W);
+      const dc = closed ? 'yes' : 'no';
+      // arrow pointing down to the dot, label above it
+      h += `<line x1="${px}" y1="${y - 40}" x2="${px}" y2="${y - 22}" class="ann-arrow ${dc}"/>`;
+      h += `<path d="M${px} ${y - 13} L${px - 6} ${y - 23} L${px + 6} ${y - 23} Z" class="ann-head ${dc}"/>`;
+      h += vertSVG(vl, px, y - 46, dc);
+    }
+    h += `<circle id="ghost" cx="-100" cy="${y}" r="14" class="ghost"/>`;
+    h += `<rect id="hit" x="0" y="0" width="${W}" height="${H}" fill="transparent"/>`;
+    svg.innerHTML = h;
+    if (ann) {
+      // Measure the rotated label and redraw once so the space above fits it exactly
+      try {
+        const m = Math.max(...[...svg.querySelectorAll('.vert tspan')].map(t => t.getComputedTextLength()));
+        if (m > 0 && Math.abs(m - vl.len) > 3) { it.vlen = m; drawLine(); }
+      } catch (_) {}
+    }
+  }
+  window.addEventListener('resize', () => { if (state.items.length && !state.finished) { drawReal(); drawLine(); } });
+  function renderAll(keepFocus) {
+    if (state.finished) { renderHeader(); renderFinish(); return; }
+    state.items.forEach(x => { x.following = false; x.drag = null; });
+    pressX = null; togglePress = null;
+    renderHeader();
+    renderCard();
+  }
+
+  // ---------- Events ----------
+  function svgX(e) {
+    const svg = $('#nl');
+    const m = svg.getScreenCTM(); if (!m) return null;
+    const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    return pt.matrixTransform(m.inverse()).x;
+  }
+  const idxAt = x => Math.max(0, Math.min(N_TICKS - 1, Math.round((x - GEO.x0) / GEO.dx)));
+  let pressX = null;
+  function commitArrow(it, x) {
+    const px = tickX(it.g.p);
+    if (Math.abs(x - px) > 20) it.g.d = x > px ? 'right' : 'left';
+    stopFollow(it);
+    paintCard();
+  }
+  function stopFollow(it) {
+    it.following = false; it.drag = null; pressX = null;
+    const svg = $('#nl'); if (svg) svg.classList.remove('following');
+  }
+  // While following, the arrow tracks the pointer anywhere on the page
+  let togglePress = null;
+  window.addEventListener('pointerup', () => { setTimeout(() => { togglePress = null; }, 0); });
+  window.addEventListener('pointermove', e => {
+    const it = cur(); if (!it) return;
+    if (togglePress && !it.following) {
+      // Pressed on the circle and moved: treat it as redrawing the arrow
+      const x = svgX(e);
+      if (x !== null && Math.abs(x - togglePress.x) > 12) {
+        pressX = togglePress.x; togglePress = null;
+        it.following = true; it.drag = x;
+        const svg = $('#nl'); if (svg) svg.classList.add('following');
+        drawLine();
+      }
+      return;
+    }
+    if (!it.following) return;
+    const x = svgX(e); if (x === null) return;
+    it.drag = x; drawLine();
+  });
+  // Clicking anywhere off the number line, or pressing Escape, stops following without changing the arrow
+  document.addEventListener('pointerdown', e => {
+    const it = cur(); if (!it || !it.following || e.target.closest('#nl')) return;
+    stopFollow(it); drawLine();
+  }, true);
+  document.addEventListener('keydown', e => {
+    const it = cur(); if (e.key !== 'Escape' || !it || !it.following) return;
+    stopFollow(it); drawLine();
+  });
+  function bindCard() {
+    const it = cur();
+    document.querySelectorAll('[data-v]').forEach(x => x.addEventListener('click', () => pickPart('v', x.dataset.v)));
+    document.querySelectorAll('[data-s]').forEach(x => x.addEventListener('click', () => pickPart('s', x.dataset.s)));
+    document.querySelectorAll('[data-n]').forEach(x => x.addEventListener('click', () => pickPart('n', x.dataset.n)));
+
+    const svg = $('#nl');
+    const ghost = cx => { const gh = $('#ghost'); if (gh) gh.setAttribute('cx', cx); };
+    svg.addEventListener('pointerdown', e => {
+      if (!it.aOk || it.done) return;
+      const x = svgX(e); if (x === null) return;
+      e.preventDefault();
+      if (it.following) { commitArrow(it, x); return; }
+      const onCircle = it.g.p !== null && Math.abs(x - tickX(it.g.p)) < 22;
+      // Once the arrow is drawn, clicking the circle switches open/closed (dragging from it still redraws the arrow)
+      if (onCircle && it.g.d) { togglePress = { x }; return; }
+      if (!onCircle) { it.g.p = idxAt(x); it.g.d = null; }
+      if (!it.g.c) it.g.c = 'open';
+      it.following = true; it.drag = x; pressX = x;
+      svg.classList.add('following');
+      drawLine();
+    });
+    svg.addEventListener('pointerup', e => {
+      if (togglePress) {
+        togglePress = null;
+        it.g.c = it.g.c === 'closed' ? 'open' : 'closed';
+        paintCard(); return;
+      }
+      // Press-and-drag also works: letting go far from where you pressed sets the arrow
+      if (it.following && pressX !== null) {
+        const x = svgX(e);
+        if (x !== null && Math.abs(x - pressX) > 25) commitArrow(it, x);
+      }
+      pressX = null;
+    });
+    svg.addEventListener('pointermove', e => {
+      if (it.following) return;
+      const x = svgX(e); if (x === null) return;
+      ghost(it.aOk && !it.done ? tickX(idxAt(x)) : -100);
+    });
+    svg.addEventListener('pointerleave', () => ghost(-100));
+    svg.addEventListener('keydown', e => {
+      if (!it.aOk) return;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (!it.g.c) it.g.c = 'open';
+        if (e.shiftKey) { if (it.g.p === null) it.g.p = 0; it.g.d = e.key === 'ArrowRight' ? 'right' : 'left'; }
+        else if (it.g.p === null) it.g.p = 0;
+        else it.g.p = Math.max(0, Math.min(N_TICKS - 1, it.g.p + (e.key === 'ArrowRight' ? 1 : -1)));
+        paintCard(); $('#nl').focus();
+      } else if (e.key === ' ' && it.g.p !== null) {
+        e.preventDefault();
+        it.g.c = it.g.c === 'closed' ? 'open' : 'closed';
+        paintCard(); $('#nl').focus();
+      }
+    });
+    document.querySelectorAll('[data-c]').forEach(x => x.addEventListener('click', () => { it.g.c = x.dataset.c; paintCard(); }));
+    $('#clear').addEventListener('click', () => { it.g = { p: null, c: null, d: null }; paintCard(); });
+    $('#check-g').addEventListener('click', checkGraph);
+    $('#prev').addEventListener('click', () => { if (state.i > 0) { state.i--; renderAll(); } });
+    $('#fb-g').addEventListener('click', () => { if (cur().done) goNext(); });
+    $('#fb-g').addEventListener('keydown', e => { if ((e.key === ' ') && cur().done) { e.preventDefault(); goNext(); } });
+    const tb = $('#turnin-btn'); if (tb) tb.addEventListener('click', openTurnIn);
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+    const it = cur(); if (!it || state.finished) return;
+    if (e.target.closest && e.target.closest('input, textarea, select, form')) return;
+    e.preventDefault();
+    if (it.done) {
+      goNext();
+    } else if (it.aOk && it.g.p !== null) {
+      checkGraph();
+    }
+  }, true);
+  document.addEventListener('click', e => {
+    const go = e.target.closest('[data-go]');
+    if (go) { state.i = +go.dataset.go; renderAll(); }
+  });
+
+  startDrill();
+})();
+</script>
+
+</body>
+</html>
