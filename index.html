@@ -5,48 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>body{margin:0} img{max-width:100%} [hidden]{display:none!important}</style>
 <title>Write It, Graph It</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Overpass:wght@600;800;900&family=Overpass+Mono:wght@500;700&display=swap">
 <style>
 /* Layout: one problem card at a time under a highway-guide-sign header; number line drawn in "teacher's blue marker" */
 :root {
-  --bg: #edf1ed;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --ink: #16211b;
-  --muted: #55645b;
-  --line: #cdd8cf;
+  --ink: #111813;
+  --muted: #2f3a33;
+  --line: #b7c2bb;
   --accent: #0d6a43;
   --accent-ink: #ffffff;
   --plot: #1b4fd1;
   --plot-soft: rgba(27, 79, 209, .18);
   --good: #17733a;
-  --good-bg: #e2f2e7;
+  --good-bg: #ffffff;
   --bad: #b42318;
-  --bad-bg: #fbe8e5;
+  --bad-bg: #ffffff;
   --sign-white: #ffffff;
   --sign-black: #141414;
   --sign-green: #0d6a43;
   --sign-blue: #1d4fa0;
   --sign-brown: #6b3a24;
-  --f-display: "Overpass", "Arial Narrow", system-ui, sans-serif;
-  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-mono: "Overpass Mono", ui-monospace, Menlo, Consolas, monospace;
+  --f-display: Tahoma, Verdana, "DejaVu Sans", Geneva, sans-serif;
+  --f-body: Tahoma, Verdana, "DejaVu Sans", Geneva, sans-serif;
+  --f-mono: Tahoma, Verdana, "DejaVu Sans", Geneva, sans-serif;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f1612; --surface: #17211b; --ink: #e4ebe5; --muted: #99a99f; --line: #2c3a31;
-    --accent: #3daa76; --accent-ink: #07130c; --plot: #7ea5ff; --plot-soft: rgba(126, 165, 255, .22);
-    --good: #62cb89; --good-bg: #13291c; --bad: #ff8b7c; --bad-bg: #2f1612;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0f1612; --surface: #17211b; --ink: #e4ebe5; --muted: #99a99f; --line: #2c3a31;
-  --accent: #3daa76; --accent-ink: #07130c; --plot: #7ea5ff; --plot-soft: rgba(126, 165, 255, .22);
-  --good: #62cb89; --good-bg: #13291c; --bad: #ff8b7c; --bad-bg: #2f1612;
-  color-scheme: dark;
-}
+:root { color-scheme: light; }
 * { box-sizing: border-box; }
 body {
   background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5;
@@ -326,6 +310,15 @@ body { margin: 0; }
 .graph-cap b { color: var(--ink); }
 .graph-cap code { font-family: var(--f-mono); font-weight: 700; color: var(--plot); }
 .real { border-top: 1px dashed var(--line); padding-top: 6px; }
+.try { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px; border-radius: 12px; background: var(--bg); border: 2px solid var(--plot); }
+.try.solved { border-color: var(--good); background: var(--good-bg); padding: 6px 14px; }
+.try-q { font-weight: 700; font-size: 1.05rem; }
+.try code, .try-done code { font-family: var(--f-mono); font-weight: 700; color: var(--plot); }
+#try-input { font: 700 1.3rem var(--f-mono); width: 9ch; padding: 6px 10px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); }
+#try-input:focus { outline: none; border-color: var(--plot); }
+.try-fb { flex-basis: 100%; color: var(--bad); font-weight: 600; }
+.try-done { color: var(--good); font-weight: 600; }
+.try-done b { font-family: var(--f-mono); }
 .expr.mini { padding: 4px 8px; gap: 6px; }
 .expr.mini .slot { height: 40px; min-width: 40px; font-size: 1.3rem; }
 #rl { display: block; width: 100%; height: 64px; }
@@ -348,7 +341,7 @@ body { margin: 0; }
 .scenario { gap: 16px; }
 .actions { padding-top: 10px; }
 @media (min-width: 900px) { .card { padding: 18px 28px; gap: 14px; } }
-@media (max-width: 520px) { .card { padding: 10px 14px; gap: 8px; } .plate { width: 92px; } .plate .big { font-size: 1.6rem; } .scenario { flex-wrap: nowrap; gap: 12px; } .scn-text { flex: 1 1 0; } .situation { font-size: 1.02rem; } .real-cap { font-size: .86rem; line-height: 1.35; } #rl { height: 52px; } .graph-cap .long { display: none; } .graph-cap { font-size: .88rem; } .fb.ok { font-size: 1.3rem; padding: 4px 10px; } .go-next { font-size: .85rem; padding: 4px 10px; } .plate { width: 84px; } .plate .big { font-size: 1.45rem; } .plate .ln { font-size: .72rem; } }
+@media (max-width: 520px) { .card { padding: 8px 12px; gap: 6px; } .plate { width: 92px; } .plate .big { font-size: 1.6rem; } .scenario { flex-wrap: nowrap; gap: 12px; } .scn-text { flex: 1 1 0; } .situation { font-size: 1.02rem; } .step-head .fb { flex-basis: 150px; } .step-head h3 .lbl { display: none; } .real-cap { font-size: .86rem; line-height: 1.35; } #rl { height: 52px; } .graph-cap .long { display: none; } .graph-cap { font-size: .88rem; } .fb.ok { font-size: 1.3rem; padding: 4px 10px; } .go-next { font-size: .85rem; padding: 4px 10px; } .plate { width: 84px; } .plate .big { font-size: 1.45rem; } .plate .ln { font-size: .72rem; } }
 
 /* ---- turn-in page ---- */
 .turnin { flex: 1 1 auto; min-height: 0; overflow: auto; background: var(--surface); border: 2px solid var(--good); border-radius: 16px;
@@ -380,6 +373,107 @@ body { margin: 0; }
 .turnin-btn { border-color: var(--good); color: var(--good); }
 .turnin h2.early { color: var(--ink); }
 .turnin:has(h2.early) { border-color: var(--line); }
+
+/* ---- White page, bigger and bolder text ---- */
+body { font-size: 18px; font-weight: 700; }
+.situation { font-size: clamp(1.25rem, 2.3vw, 1.7rem); font-weight: 700; line-height: 1.35; }
+.card { border: 2px solid var(--line); }
+.line-wrap { background: #ffffff; border: 2px solid var(--line); }
+#nl .tlabel { font: 700 19px var(--f-mono); }
+#nl .hint { font: 700 17px var(--f-body); fill: var(--ink); }
+#nl .ann { font-weight: 700; }
+#rl .tlabel { font: 700 15px var(--f-mono); fill: var(--ink); }
+#rl .axis, #rl .tick { stroke: var(--ink); }
+.step h3 { font-size: 1.15rem; }
+.ask-q { font-size: 1.2rem; }
+.tile { font-size: 1.4rem; font-weight: 700; }
+.tile small { font-size: .82rem; font-weight: 700; color: var(--ink); }
+.fb { font-size: 1.1rem; font-weight: 700; }
+.fb.no { border: 2px solid var(--bad); }
+.fb.ok { background: #ffffff; border-width: 3px; }
+.fb-sub { font-size: 1.05rem; color: var(--ink); }
+.go-next { font-size: 1.05rem; }
+.graph-cap, .real-cap { font-size: 1.08rem; color: var(--ink); font-weight: 700; }
+.try { background: #ffffff; }
+.try-q { font-size: 1.2rem; }
+.try-fb { font-size: 1.05rem; }
+.count { font-size: 1.05rem; color: var(--ink); }
+.btn { font-size: 1.05rem; }
+.seg button { font-size: 1.05rem; font-weight: 700; }
+.linkbtn { font-size: 1rem; font-weight: 700; color: var(--ink); }
+.ti-sub, .ti-check .t, .ti-check .hd { color: var(--ink); }
+@media (max-width: 520px) {
+  body { font-size: 16px; }
+  .situation { font-size: 1.1rem; }
+  .graph-cap, .real-cap { font-size: .86rem; line-height: 1.3; }
+  #nl .tlabel { font-size: 17px; }
+  .fb.ok { font-size: 1.2rem; gap: 8px; }
+  .go-next { font-size: .85rem; padding: 3px 9px; margin-left: 0; }
+  #rl { height: 46px; }
+  .fb-sub { font-size: .9rem; }
+}
+
+/* ---- Tahoma, larger type, no boxes around the card or number line ---- */
+body { font-family: var(--f-body); font-size: clamp(18px, 2.4vh, 24px); font-weight: 700; }
+.card { border: 0; border-radius: 0; box-shadow: none; padding-inline: clamp(8px, 2vw, 28px); }
+.line-wrap { background: transparent; border: 0; border-radius: 0; }
+.situation { font-size: clamp(1.3rem, 3.6vh, 2.3rem); }
+.slot { font-size: clamp(1.5rem, 3.4vh, 2.1rem); height: clamp(46px, 6.4vh, 64px); min-width: clamp(46px, 6.4vh, 64px); }
+.expr.mini .slot { font-size: clamp(1.3rem, 2.8vh, 1.7rem); height: clamp(40px, 5.2vh, 52px); min-width: clamp(40px, 5.2vh, 52px); }
+.tile { font-size: clamp(1.4rem, 3.2vh, 2rem); min-height: clamp(48px, 6.6vh, 66px); min-width: clamp(58px, 7.5vh, 76px); }
+.tile small { font-size: clamp(.8rem, 1.7vh, 1rem); }
+.ask-q, .try-q { font-size: clamp(1.2rem, 2.8vh, 1.7rem); }
+.step h3 { font-size: clamp(1.1rem, 2.5vh, 1.5rem); }
+.fb { font-size: clamp(1.1rem, 2.5vh, 1.5rem); }
+.fb.ok { font-size: clamp(1.5rem, 3.6vh, 2.4rem); }
+.go-next { font-size: clamp(1rem, 2.1vh, 1.3rem); }
+.graph-cap, .real-cap { font-size: clamp(1.05rem, 2.3vh, 1.45rem); }
+#try-input { font-size: clamp(1.3rem, 3vh, 1.9rem); }
+.btn { font-size: clamp(1rem, 2.2vh, 1.35rem); }
+.seg button { font-size: clamp(1rem, 2.2vh, 1.35rem); }
+.count { font-size: clamp(1rem, 2.2vh, 1.35rem); }
+#nl .tlabel { font: 700 23px var(--f-mono); }
+#nl .hint { font: 700 21px var(--f-body); }
+#rl .tlabel { font: 700 18px var(--f-mono); }
+#rl { height: clamp(56px, 8vh, 80px); }
+.real { border-top: 2px dashed var(--line); }
+.cap-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+.cap-row .graph-cap { flex: 1 1 320px; margin: 0; }
+.real-btn { border-color: var(--good); color: var(--good); padding: 8px 14px; }
+.step { border-top: 2px solid var(--line); }
+.actions { border-top: 2px solid var(--line); }
+.plate { width: clamp(110px, 15vh, 150px); }
+.plate .big { font-size: clamp(2rem, 4.6vh, 2.8rem); }
+.plate .ln { font-size: clamp(.8rem, 1.7vh, 1.05rem); }
+@media (max-width: 520px) {
+  body { font-size: 16px; }
+  .situation { font-size: 1.15rem; }
+  .graph-cap, .real-cap { font-size: .9rem; }
+  .fb.ok { font-size: 1.25rem; }
+  .go-next { font-size: .85rem; }
+  .plate { width: 84px; } .plate .big { font-size: 1.45rem; } .plate .ln { font-size: .72rem; }
+  #rl { height: 40px; }
+  .step { padding-top: 6px; }
+  .real-btn { padding: 4px 10px; font-size: .85rem; }
+  .real-cap { font-size: .8rem; }
+}
+
+/* ---- big check in the middle of the screen ---- */
+.big-ok { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 50; animation: bo-out 1.3s ease forwards; }
+.big-ok svg { width: min(38vw, 38vh, 260px); height: auto; filter: drop-shadow(0 6px 18px rgba(0,0,0,.18)); animation: bo-pop .45s cubic-bezier(.2, 1.5, .4, 1); }
+.big-ok .bo-c { fill: var(--good); }
+.big-ok .bo-k { fill: none; stroke: #ffffff; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 90; stroke-dashoffset: 90; animation: bo-draw .35s .15s ease-out forwards; }
+@keyframes bo-pop { from { transform: scale(.4); } to { transform: scale(1); } }
+@keyframes bo-draw { to { stroke-dashoffset: 0; } }
+@keyframes bo-out { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .big-ok svg { animation: none; }
+  .big-ok .bo-k { animation: none; stroke-dashoffset: 0; }
+}
+.next-hint { color: var(--good); font-weight: 700; cursor: pointer; font-size: clamp(1rem, 2.3vh, 1.4rem); }
+.next-hint small { color: var(--ink); font-size: .85em; }
+.next-hint .touch { display: none; }
+@media (hover: none) and (pointer: coarse) { .next-hint .kb { display: none; } .next-hint .touch { display: inline; } }
 </style>
 </head>
 <body>
@@ -625,17 +719,17 @@ body { margin: 0; }
   const SOLID = 'can be any amount, so the line is solid';
   const AGE = "Ages aren't only whole birthdays (someone can be 12½), so the line is solid";
   const REAL = {
-    0: { kind: 'whole', cap: 'Lightning strikes are counted one at a time, so the answer is separate dots. They fade out because there is a real limit, even though the rule doesn’t say where.' },
-    1: { kind: 'up', cap: `Height ${SOLID}. It fades out because people only grow so tall.` },
+    0: { kind: 'whole', cap: 'Lightning strikes are counted one at a time, so the answer is separate dots. The … means more dots, up to however many times it really hits.' },
+    1: { kind: 'max', max: 107, cap: `Height ${SOLID}. The tallest person ever was about 107 inches tall (8 ft 11 in), so the real graph stops there.` },
     2: { kind: 'note', cap: `Temperature ${SOLID}. (Water boils at 100°C at sea level. On a tall mountain it boils at a lower temperature.)` },
-    3: { kind: 'up', cap: `Temperature ${SOLID}. It fades out because the generator also has a hottest temperature it can handle.` },
-    4: { kind: 'up', cap: `Time ${SOLID}. It fades out because there are only so many hours in a lifetime.` },
-    5: { kind: 'up', cap: `Speed ${SOLID}. It fades out because this road also has a speed limit.` },
-    6: { kind: 'up', cap: `${AGE}. It fades out because people only live so long.` },
-    7: { kind: 'whole', cap: 'Grandma bakes whole cookies, so the answer is separate dots. They fade out because she can’t bake a trillion cookies, but the rule doesn’t say where she stops.' },
-    8: { kind: 'up', cap: `Weight ${SOLID}. It fades out because zip lines also have a top weight limit.` },
-    9: { kind: 'whole', cap: 'Fans are whole people, so the answer is separate dots. They fade out because the stadium only holds so many people.' },
-    10: { kind: 'whole', cap: 'Band members are whole people, so the answer is separate dots. They fade out because real bands only get so big.' },
+    3: { kind: 'max', max: 134, cap: `Temperature ${SOLID}. The hottest temperature ever recorded on Earth is 134°F, so the real graph stops there.` },
+    4: { kind: 'note', cap: `Time ${SOLID}. Marco can’t train forever, but the problem doesn’t say his limit, so we can’t show where the real graph ends.` },
+    5: { kind: 'note', cap: `Speed ${SOLID}. This road also has a speed limit, but the sign doesn’t show it, so we can’t show where the real graph ends.` },
+    6: { kind: 'max', max: 122, cap: `${AGE}. The oldest person ever lived to 122, so the real graph stops there.` },
+    7: { kind: 'whole', cap: 'Grandma bakes whole cookies, so the answer is separate dots. The … means more dots, up to however many she really baked (not a trillion!).' },
+    8: { kind: 'note', cap: `Weight ${SOLID}. Zip lines also have a top weight limit, but the problem doesn’t say it, so we can’t show where the real graph ends.` },
+    9: { kind: 'whole', cap: 'Fans are whole people, so the answer is separate dots. The … means more dots, up to however many people fit in the stadium.' },
+    10: { kind: 'whole', cap: 'Band members are whole people, so the answer is separate dots. The … means more dots, up to however many members the band really has.' },
     12: { kind: 'zero', open0: true, cap: `Length ${SOLID}. It stops just above 0 because a bag has to have some length.` },
     13: { kind: 'whole', cap: 'Students are whole people, so the answer is separate dots.' },
     14: { kind: 'whole', cap: 'Items are counted one at a time, so the answer is separate dots.' },
@@ -647,48 +741,48 @@ body { margin: 0; }
     20: { kind: 'whole', cap: 'Kids are whole people, so the answer is separate dots.' },
     21: { kind: 'zero', cap: `${AGE}. It stops at 0 because no one is younger than 0.` },
     22: { kind: 'zero', open0: true, cap: `Width ${SOLID}. It stops just above 0 because a photo has to have some width.` },
-    23: { kind: 'down', cap: `Depth ${SOLID}. It fades out on the left because a submarine can only dive so deep.` },
-    24: { kind: 'up', cap: `${AGE}. It fades out because people only live so long.` },
-    25: { kind: 'up', cap: `${AGE}. It fades out because people only live so long.` },
-    26: { kind: 'up', cap: 'Prices can include cents, so the line is solid. It fades out because no real order costs a trillion dollars.' },
+    23: { kind: 'min', min: -36000, cap: `Depth ${SOLID}. The deepest part of the ocean is about 36,000 feet down, so the real graph stops there.` },
+    24: { kind: 'max', max: 122, cap: `${AGE}. The oldest person ever lived to 122, so the real graph stops there.` },
+    25: { kind: 'max', max: 122, cap: `${AGE}. The oldest person ever lived to 122, so the real graph stops there.` },
+    26: { kind: 'note', cap: 'Prices can include cents, so the line is solid. Orders can’t cost an endless amount, but the problem doesn’t give a top price, so we can’t show where the real graph ends.' },
     27: { kind: 'max', max: 4, cap: 'GPA can be any amount, like 3.25, so the line is solid. On a 4.0 scale it can’t go above 4.0, so the line stops there.' },
     28: { kind: 'max', max: 100, cap: 'Scores can’t go above 100, so the line stops at 100.' },
-    29: { kind: 'up', cap: `Body temperature ${SOLID}. It fades out because a body can only get so hot.` },
-    30: { kind: 'up', cap: 'Money can include cents, so the line is solid. It fades out because a class can only raise so much.' },
-    31: { kind: 'up', cap: `Temperature ${SOLID}. It fades out on the right because a winter jacket is too hot to wear in warm weather.` },
-    32: { kind: 'whole', cap: 'Points are whole numbers, so the answer is separate dots. They fade out because a team can only score so many points in one game.' },
-    33: { kind: 'up', cap: `Speed ${SOLID}. It fades out because cars only go so fast.` },
-    34: { kind: 'up', cap: `Weight ${SOLID}. It fades out because airlines also have a top weight they will take.` },
+    29: { kind: 'max', max: 115.7, cap: `Body temperature ${SOLID}. The highest body temperature anyone has survived is about 115.7°F, so the real graph stops there.` },
+    30: { kind: 'note', cap: 'Money can include cents, so the line is solid. A class can only raise so much, but the problem doesn’t say how much, so we can’t show where the real graph ends.' },
+    31: { kind: 'max', max: 134, cap: `Temperature ${SOLID}. The hottest temperature ever recorded on Earth is 134°F, so the real graph stops there.` },
+    32: { kind: 'whole', cap: 'Points are whole numbers, so the answer is separate dots. The … means more dots, up to the team’s real score.' },
+    33: { kind: 'note', cap: `Speed ${SOLID}. Cars only go so fast, but the problem doesn’t say how fast, so we can’t show where the real graph ends.` },
+    34: { kind: 'max', max: 100, cap: `Weight ${SOLID}. Most U.S. airlines won’t take a checked bag over 100 pounds, so the real graph stops at 100.` },
     35: { kind: 'note', cap: `Temperature ${SOLID}. (32°F is the same as 0°C.)` },
     36: { kind: 'whole', max: n => 2 * n, cap: n => `Votes are whole numbers, and there are only ${fmt(2 * n)} voters, so the dots stop at ${fmt(2 * n)}.` },
-    37: { kind: 'up', cap: `Data can be any amount, like 5.5 GB, so the line is solid. It fades out because you can only use so much in a month.` },
-    38: { kind: 'up', cap: `Temperature ${SOLID}. It fades out because air temperatures only get so hot.` },
+    37: { kind: 'note', cap: 'Data can be any amount, like 5.5 GB, so the line is solid. You can only use so much in a month, but the problem doesn’t say how much, so we can’t show where the real graph ends.' },
+    38: { kind: 'max', max: 134, cap: `Temperature ${SOLID}. The hottest temperature ever recorded on Earth is 134°F, so the real graph stops there.` },
     39: { kind: 'zero', cap: `Time can be any amount, like 1½ hours, so the line is solid. It stops at 0 because you can’t have less than 0 hours.` },
     40: { kind: 'whole', cap: 'Characters are counted one at a time, so the answer is separate dots.' },
     41: { kind: 'zero', cap: 'Prices can include cents, like $24.99, so the line is solid. It stops at $0.' },
     42: { kind: 'whole', cap: 'You choose whole toppings, so the answer is separate dots (0 toppings means plain cheese).' },
-    43: { kind: 'down', cap: `Temperature ${SOLID}. It fades out on the left because a freezer can only get so cold.` },
+    43: { kind: 'min', min: -459.67, cap: `Temperature ${SOLID}. Nothing can be colder than absolute zero, −459.67°F, so the real graph stops there.` },
     44: { kind: 'whole', cap: 'Students are whole people, so the answer is separate dots.' },
     45: { kind: 'zero', cap: `Liquid ${SOLID}. It stops at 0 because you can’t have less than 0 ounces.` },
     46: { kind: 'whole', cap: 'Books are counted one at a time, so the answer is separate dots.' },
     47: { kind: 'zero', cap: `${AGE}. It stops at 0 because no one is younger than 0.` },
     48: { kind: 'zero', cap: 'Battery level can be any amount from 0% to 100%, so the line is solid and stops at 0%.' },
     49: { kind: 'whole', cap: 'Strokes are whole numbers, so the answer is separate dots. (No one can finish 18 holes in fewer than 18 strokes.)' },
-    50: { kind: 'down', cap: `Time ${SOLID}. It fades out on the left because no one can run a mile that fast (the world record is about 3 minutes 43 seconds).` },
-    51: { kind: 'down', cap: `Temperature ${SOLID}. It fades out on the left because real temperatures only get so cold.` },
-    52: { kind: 'down', cap: `Depth ${SOLID}. It fades out on the left because the ocean is only so deep (the deepest spot is about 11,000 meters down).` },
-    53: { kind: 'down', cap: 'Balances can include cents, so the line is solid. It fades out on the left because a bank only lets an account go so far below $0.' },
-    54: { kind: 'down', cap: `Height ${SOLID}. It fades out on the left because even babies are about 20 inches long.` },
-    55: { kind: 'whole', cap: 'Jokes are counted one at a time, so the answer is separate dots. They fade out because dinner has to end sometime.' },
-    56: { kind: 'up', cap: `Fish length ${SOLID}. It fades out because snapper only grow so long.` },
-    57: { kind: 'up', cap: `Distance ${SOLID}. It fades out because once you're far enough back, you aren't following the truck anymore.` },
+    50: { kind: 'min', min: 3.72, cap: `Time ${SOLID}. The world record for the mile is about 3 minutes 43 seconds (about 3.72 minutes), so the real graph starts there.` },
+    51: { kind: 'note', cap: `Temperature ${SOLID}. Wind chills only get so cold, but the problem doesn’t say how cold, so we can’t show where the real graph ends.` },
+    52: { kind: 'min', min: -11000, cap: `Depth ${SOLID}. The deepest part of the ocean is about 11,000 meters down, so the real graph stops there.` },
+    53: { kind: 'note', cap: 'Balances can include cents, so the line is solid. A bank only lets an account go so far below $0, but the problem doesn’t say how far, so we can’t show where the real graph ends.' },
+    54: { kind: 'min', min: 20, cap: `Height ${SOLID}. A newborn baby is about 20 inches long, so the real graph starts at about 20 inches.` },
+    55: { kind: 'whole', cap: 'Jokes are counted one at a time, so the answer is separate dots. The … means more dots, up to however many jokes he really tells.' },
+    56: { kind: 'max', max: 39, cap: `Fish length ${SOLID}. Snapper can grow to about 39 inches long, so the real graph stops there.` },
+    57: { kind: 'note', cap: `Distance ${SOLID}. Cars can stay any distance back, so the problem doesn’t give a farthest distance, and we can’t show where the real graph ends.` },
     58: { kind: 'whole', cap: 'People are counted in whole numbers, so the answer is separate dots.' },
     59: { kind: 'whole', cap: 'People are counted in whole numbers, so the answer is separate dots.' },
-    60: { kind: 'whole', cap: 'Axles are whole numbers, so the answer is separate dots. They fade out because real vehicles only have so many axles.' },
-    61: { kind: 'up', cap: `Time ${SOLID}. It fades out because the event ends eventually.` },
+    60: { kind: 'whole', cap: 'Axles are whole numbers, so the answer is separate dots. The … means more dots, up to the most axles a real vehicle has.' },
+    61: { kind: 'note', cap: `Time ${SOLID}. The event ends at some point, but the problem doesn’t say when, so we can’t show where the real graph ends.` },
     62: { kind: 'whole', cap: 'Marbles are counted one at a time, so the answer is separate dots.' },
     63: { kind: 'zero', cap: `${AGE}. It stops at 0 because no one is younger than 0.` },
-    64: { kind: 'up', cap: `${AGE}. It fades out because people only live so long.` },
+    64: { kind: 'max', max: 122, cap: `${AGE}. The oldest person ever lived to 122, so the real graph stops there.` },
     65: { kind: 'zero', cap: `${AGE}. It stops at 0 because no one is younger than 0.` },
     66: { kind: 'zero', cap: `${AGE}. It stops at 0 because no one is younger than 0.` }
   };
@@ -814,7 +908,7 @@ body { margin: 0; }
     }
     if (ok) {
       it.sel[kind] = kind === 'n' ? +raw : raw;
-      if (kind === 'n') { it.aOk = true; it.fbA = { ok: true, msg: 'Correct!' }; }
+      if (kind === 'n') { it.aOk = true; it.fbA = { ok: true, msg: 'Correct!' }; celebrate(); }
       else it.fbA = null;
     } else {
       it.wrong[kind].push(raw); it.miss = true; it.fbA = { ok: false, msg };
@@ -838,10 +932,63 @@ body { margin: 0; }
     if (!it.aOk) return;
     const g = evalGraph(it);
     it.fbG = g;
-    if (g.ok) { it.done = true; if (it.miss) g.sub = "Had a mistake, so this one doesn't count."; }
-    else if (!it.done) it.miss = true;
+    if (g.ok) { it.gOk = true; celebrate(); }
+    else if (!it.gOk) it.miss = true;
     renderAll(true);
+    if (g.ok) setTimeout(() => { const el = $('#try-input'); if (el) el.focus(); }, 30);
   }
+  // Step 3: type any number that makes the inequality true
+  function parseNum(raw) {
+    const s = String(raw).trim().replace(/[−–—]/g, '-').replace(/\s+/g, ' ').replace(/,/g, '');
+    if (!s) return null;
+    let m;
+    if ((m = s.match(/^(-?)(\d+) (\d+)\/(\d+)$/))) {          // mixed number like 2 1/2 or -2 1/2
+      const v = +m[2] + +m[3] / +m[4]; return +m[4] === 0 ? NaN : (m[1] ? -v : v);
+    }
+    if ((m = s.match(/^(-?\d*\.?\d+)\/(-?\d*\.?\d+)$/))) return +m[2] === 0 ? NaN : +m[1] / +m[2];   // fraction like -1/2
+    if (/^[-+]?(\d+\.?\d*|\.\d+)$/.test(s)) return +s;
+    return NaN;
+  }
+  function checkTry() {
+    const it = cur(), inp = $('#try-input');
+    if (!it.gOk || it.done || !inp) return;
+    it.tryRaw = inp.value;
+    const v = parseNum(inp.value), t = it.t, b = it.b, B = fmt(b), sym = SYM[t.sign];
+    const right = t.sign[0] === '>', incl = t.sign.includes('=');
+    if (v === null) { it.fbT = { ok: false, msg: 'Type a number first.' }; return renderAll(true), refocusTry(); }
+    if (Number.isNaN(v)) { it.fbT = { ok: false, msg: 'Type a number, like 3, -2.5, or 1/2.' }; return renderAll(true), refocusTry(); }
+    const ok = right ? (incl ? v >= b - 1e-12 : v > b + 1e-12) : (incl ? v <= b + 1e-12 : v < b - 1e-12);
+    const shown = inp.value.trim().replace(/-/g, '−');
+    if (ok) {
+      it.tryVal = shown; it.done = true; celebrate();
+      it.fbT = { ok: true, msg: `${shown} ${sym} ${B} is true.` };
+      it.fbG = { ok: true, msg: 'Correct!', sub: it.miss ? "Had a mistake, so this one doesn't count." : '' };
+    } else {
+      it.miss = true;
+      const hint = Math.abs(v - b) < 1e-12
+        ? `${B} doesn't work. The circle is open, so ${B} itself isn't included.`
+        : `${shown} ${sym} ${B} is false. Pick a number in the shaded part, ${right ? 'to the right of' : 'to the left of'} ${B}.`;
+      it.fbT = { ok: false, msg: hint };
+    }
+    renderAll(true);
+    if (!ok) refocusTry();
+  }
+  let autoTimer = null;
+  function tryWorks(it, raw) {
+    const v = parseNum(raw);
+    if (v === null || Number.isNaN(v)) return false;
+    const b = it.b, sg = it.t.sign;
+    return sg[0] === '>' ? (sg.includes('=') ? v >= b - 1e-12 : v > b + 1e-12) : (sg.includes('=') ? v <= b + 1e-12 : v < b - 1e-12);
+  }
+  function celebrate() {
+    const old = document.querySelector('.big-ok'); if (old) old.remove();
+    const el = document.createElement('div');
+    el.className = 'big-ok'; el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" class="bo-c"/><path d="M34 62 L52 80 L87 42" class="bo-k"/></svg>';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1300);
+  }
+  function refocusTry() { setTimeout(() => { const el = $('#try-input'); if (el) { el.focus(); el.select(); } }, 30); }
   function reveal() {
     const it = cur();
     if (!it.aOk) {
@@ -961,7 +1108,7 @@ body { margin: 0; }
           <p class="situation">${esc(t.text(it.b))}</p>
         </div>
       </div>
-      <section class="step" id="step-write" ${it.done ? 'hidden' : ''}>
+      <section class="step" id="step-write" ${it.gOk ? 'hidden' : ''}>
         <div class="step-head">
           <h3><span class="stepno">1</span>Write it</h3>
           <div class="expr" id="expr" aria-live="polite"><span class="slot" id="slot-v"></span><span class="slot" id="slot-s"></span><span class="slot" id="slot-n"></span></div>
@@ -971,25 +1118,34 @@ body { margin: 0; }
       </section>
       <section class="step" id="step-graph" ${it.aOk ? '' : 'hidden'}>
         <div class="step-head">
-          <h3><span class="stepno">2</span>Graph it</h3>
-          ${it.done ? `<div class="expr ok mini"><span class="slot">${esc(it.t.v)}</span><span class="slot">${SYM[it.t.sign]}</span><span class="slot">${fmt(it.b)}</span></div>` : ''}
+          <h3><span class="stepno">2</span><span class="lbl">Graph it</span></h3>
+          ${it.gOk ? `<div class="expr ok mini"><span class="slot">${esc(it.t.v)}</span><span class="slot">${SYM[it.t.sign]}</span><span class="slot">${fmt(it.b)}</span></div>` : ''}
           <p class="fb" id="fb-g"></p>
         </div>
         <div class="line-wrap"><svg id="nl" viewBox="0 0 600 100" preserveAspectRatio="xMidYMid meet" tabindex="0" role="img" aria-label="Number line. Click a number to place the circle, move the pointer left or right, and click again to set the arrow. Keyboard: arrow keys move the circle, Shift plus arrow sets the direction, Space switches open and closed."></svg></div>
-        <div class="graph-row" ${it.done ? 'hidden' : ''}>
+        <div class="graph-row" ${it.gOk ? 'hidden' : ''}>
           <div class="seg" role="group" aria-label="Circle type">
             <button type="button" data-c="open">○ Open</button><button type="button" data-c="closed">● Closed</button></div>
           <button type="button" class="linkbtn" id="clear">Clear</button>
           <span class="spacer"></span>
-          <button type="button" class="btn primary" id="check-g" ${it.aOk && !it.done ? '' : 'disabled'}>Check graph</button>
+          <button type="button" class="btn primary" id="check-g" ${it.aOk && !it.gOk ? '' : 'disabled'}>Check graph</button>
         </div>
-        ${it.done ? `<p class="graph-cap"><b>Math graph:</b> <span class="long">this is the graph of the math inequality </span><code>${esc(answerStr(it))}</code>.</p>` : ''}
-        ${it.done && realKind(t) ? `<div class="real"><svg id="rl" viewBox="0 0 600 64" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Real-life graph"></svg><p class="real-cap"></p></div>` : ''}
+        ${it.gOk && !it.done ? `<div class="try">
+          <span class="stepno">3</span>
+          ${it.done
+            ? `<span class="try-done">✓ <b>${esc(it.tryVal)}</b> works: <code>${esc(it.fbT.msg)}</code></span>`
+            : `<label for="try-input" class="try-q">Type a number that makes <code>${esc(answerStr(it))}</code> true:</label>
+               <input id="try-input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="e.g. 3" value="${esc(it.tryRaw || '')}">
+               <button type="button" class="btn primary" id="try-check">Check</button>
+               ${it.fbT && !it.fbT.ok ? `<span class="try-fb">✗ ${esc(it.fbT.msg)}</span>` : ''}`}
+        </div>` : ''}
+        ${it.done ? `<div class="cap-row"><p class="graph-cap"><b>Math graph:</b> <span class="long">this is the graph of the math inequality </span><code>${esc(answerStr(it))}</code>. <span class="try-done">✓ Your number <b>${esc(it.tryVal || '')}</b> works<span class="long">: <code>${esc(it.fbT ? it.fbT.msg : '')}</code></span></span></p>${realKind(t) ? `<button type="button" class="btn real-btn" id="real-btn" aria-expanded="${it.showReal ? 'true' : 'false'}">${it.showReal ? 'Hide realistic graph' : 'Show realistic graph'}</button>` : ''}</div>` : ''}
+        ${it.done && realKind(t) && it.showReal ? `<div class="real"><svg id="rl" viewBox="0 0 600 64" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Real-life graph"></svg><p class="real-cap"></p></div>` : ''}
       </section>
       <div class="why" id="why"></div>
       <div class="actions">
+        ${it.done ? `<span class="next-hint" id="next-hint" role="button" tabindex="0"><span class="kb">Press Enter for the next problem →</span><span class="touch">Tap here for the next problem →</span>${it.miss ? '<small> (had a mistake, so this one doesn\'t count)</small>' : ''}</span>` : ''}
         <span class="spacer"></span>
-        <button type="button" class="btn" id="prev" ${state.i === 0 ? 'disabled' : ''}>← Back</button>
         <span class="goal" title="Correct on the first try">
           <span class="goal-bar"><span style="width:${Math.min(100, correctCount() / GOAL * 100)}%"></span></span>
           <span class="count"><b>${correctCount()}</b>${correctCount() >= GOAL ? '' : ` / ${GOAL}`} correct</span>
@@ -1005,17 +1161,11 @@ body { margin: 0; }
     const ex = $('#expr');
     const fa = $('#fb-a'), fg = $('#fb-g');
     fa.className = 'fb'; fg.className = 'fb'; fa.innerHTML = ''; fg.innerHTML = ''; ex.className = 'expr';
-    if (it.fbA && !it.done) {
-      fa.innerHTML = it.fbA.ok ? `<span class="ok-badge">✓</span><span>${it.fbA.msg}</span>` : '✗ ' + it.fbA.msg; fa.classList.add(it.fbA.ok ? 'ok' : 'no');
+    if (it.fbA && !it.gOk) {
+      if (!it.fbA.ok) { fa.innerHTML = '✗ ' + it.fbA.msg; fa.classList.add('no'); }
       ex.classList.add(it.fbA.ok ? 'ok' : 'no');
     }
-    if (it.fbG) {
-      fg.innerHTML = it.fbG.ok
-        ? `<span class="ok-badge">✓</span><span>${it.fbG.msg}${it.fbG.sub ? `<small class="fb-sub">${it.fbG.sub}</small>` : ''}</span><span class="go-next"><span class="kb">Press Enter or click here</span><span class="touch">Tap here</span> for the next problem →</span>`
-        : '✗ ' + it.fbG.msg;
-      fg.classList.add(it.fbG.ok ? 'ok' : 'no');
-      if (it.done) { fg.setAttribute('role', 'button'); fg.tabIndex = 0; } else { fg.removeAttribute('role'); fg.removeAttribute('tabindex'); }
-    }
+    if (it.fbG && !it.fbG.ok) { fg.innerHTML = '✗ ' + it.fbG.msg; fg.classList.add('no'); }
     $('#nl').setAttribute('tabindex', it.aOk ? '0' : '-1');
     const ph = phaseOf(it);
     const setSlot = (id, val, k) => { const el = $(id); el.textContent = val === null ? '?' : val; el.className = 'slot' + (val === null ? ' empty' : '') + (ph === k ? ' current' : ''); };
@@ -1045,8 +1195,8 @@ body { margin: 0; }
     const t = it.t, rl = t.rl, kind = rl.kind, b = it.b, right = t.sign[0] === '>', incl = t.sign.includes('=');
     const cap = $('.real-cap'), svg = $('#rl');
     let text = typeof rl.cap === 'function' ? rl.cap(b) : rl.cap;
-    if (kind === 'note') { svg.style.display = 'none'; cap.innerHTML = `<b>Real-life graph:</b> ${esc(text)}`; return; }
-    const H = 64, r = svg.getBoundingClientRect();
+    if (kind === 'note') { svg.style.display = 'none'; cap.innerHTML = `<b>Real life:</b> ${esc(text.replace(', so the line is solid', ''))}`; return; }
+    const H = 70, r = svg.getBoundingClientRect();
     const W = r.width > 0 ? Math.max(420, Math.round(H * r.width / r.height)) : 600;
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     const y = 26, x0 = 40, x1 = W - 40;
@@ -1059,40 +1209,35 @@ body { margin: 0; }
         s0 = Math.max(0, max - 10 * st + st);
       } else { st = 1; s0 = Math.max(0, Math.round(b) - 5); }
     } else if (kind === 'zero') ({ s0, st } = niceRange(0, b * 1.3 + 1e-9));
-    else if (kind === 'max') ({ s0, st } = niceRange(Math.max(0, b - (max - b) * 0.8), max));
+    else if (kind === 'max') {
+      const span = max - b; let lo = b - span * 0.12; if (t.nonneg) lo = Math.max(0, lo);
+      ({ s0, st } = niceRange(lo, max + span * 0.04));
+    } else if (kind === 'min') {
+      const mn = rl.min, span = b - mn;
+      ({ s0, st } = niceRange(mn - span * 0.04, b + span * 0.12));
+    }
     else { s0 = it.start; st = it.t.step; }
     const X = v => x0 + (v - s0) / (10 * st) * (x1 - x0);
     const vEnd = s0 + 10 * st;
-    let h = `<defs>
-      <linearGradient id="fadeR" x1="0" x2="1" y1="0" y2="0"><stop offset="0" class="gs1"/><stop offset="1" class="gs0"/></linearGradient>
-      <linearGradient id="fadeL" x1="1" x2="0" y1="0" y2="0"><stop offset="0" class="gs1"/><stop offset="1" class="gs0"/></linearGradient></defs>`;
-    h += `<line x1="10" y1="${y}" x2="${W - 10}" y2="${y}" class="axis"/>`;
+    let h = `<line x1="10" y1="${y}" x2="${W - 10}" y2="${y}" class="axis"/>`;
     for (let i = 0; i <= 10; i++) {
       const v = +(s0 + i * st).toFixed(2), tx = X(v);
-      h += `<line x1="${tx}" y1="${y - 6}" x2="${tx}" y2="${y + 6}" class="tick"/><text x="${tx}" y="${y + 26}" class="tlabel">${fmt(v)}</text>`;
+      h += `<line x1="${tx}" y1="${y - 6}" x2="${tx}" y2="${y + 6}" class="tick"/><text x="${tx}" y="${y + 30}" class="tlabel">${fmt(v)}</text>`;
     }
     const endDot = (v, closed) => `<circle cx="${X(v)}" cy="${y}" r="8" class="rend ${closed ? 'closed' : 'open'}"/>`;
     if (kind === 'whole') {
       const inSet = v => (right ? (incl ? v >= b : v > b) : (incl ? v <= b : v < b)) && v >= 0 && (max === undefined || v <= max);
       const dots = [];
       for (let v = s0; v <= vEnd; v++) if (inSet(v)) dots.push(v);
-      const fade = right && max === undefined;
-      dots.forEach((v, k) => {
-        const fromEnd = dots.length - 1 - k;
-        const op = fade && fromEnd < 4 ? (0.25 + fromEnd * 0.2).toFixed(2) : 1;
-        h += `<circle cx="${X(v)}" cy="${y}" r="7" class="rdot" style="opacity:${op}"/>`;
-      });
+      dots.forEach(v => { h += `<circle cx="${X(v)}" cy="${y}" r="7" class="rdot"/>`; });
+      if (right && max === undefined) h += `<text x="${x1 + 12}" y="${y + 6}" class="more">…</text>`;
       if (!right && s0 > 0) { h += `<text x="${x0 - 32}" y="${y + 6}" class="more">…</text>`; text += ' The … means the dots keep going down to 0.'; }
     } else if (kind === 'zero') {
       h += `<line x1="${X(0)}" y1="${y}" x2="${X(b)}" y2="${y}" class="rseg"/>` + endDot(0, !rl.open0) + endDot(b, incl);
     } else if (kind === 'max') {
       h += `<line x1="${X(b)}" y1="${y}" x2="${X(max)}" y2="${y}" class="rseg"/>` + endDot(b, incl) + endDot(max, true);
-    } else if (kind === 'up') {
-      const a = X(b), e = x1 + 20;
-      h += `<rect x="${a}" y="${y - 3}" width="${e - a}" height="6" fill="url(#fadeR)"/>` + endDot(b, incl);
-    } else if (kind === 'down') {
-      const a = x0 - 20, e = X(b);
-      h += `<rect x="${a}" y="${y - 3}" width="${e - a}" height="6" fill="url(#fadeL)"/>` + endDot(b, incl);
+    } else if (kind === 'min') {
+      h += `<line x1="${X(rl.min)}" y1="${y}" x2="${X(b)}" y2="${y}" class="rseg"/>` + endDot(rl.min, true) + endDot(b, incl);
     }
     svg.innerHTML = h;
     cap.innerHTML = `<b>Real-life graph:</b> ${esc(text)}`;
@@ -1109,7 +1254,7 @@ body { margin: 0; }
   // Wrap a label into at most 3 lines that fit maxW (rough width estimate per character)
   function fitLabel(text, maxW) {
     const words = text.split(' ');
-    for (let fs = 16; fs >= 10; fs -= 0.5) {
+    for (let fs = 23; fs >= 14; fs -= 0.5) {
       const maxChars = Math.floor(maxW / (fs * 0.58));
       const lines = []; let line = '';
       let ok = true;
@@ -1125,7 +1270,7 @@ body { margin: 0; }
   }
   // Dot label, rotated to read bottom-to-top: first column is the value, then the phrase wrapped into columns
   function vertLabel(head, phrase) {
-    const fs = 13, maxChars = 15, lh = fs * 1.2;
+    const fs = 19, maxChars = 15, lh = fs * 1.2;
     const cols = [head]; let line = '';
     for (const w of phrase.split(' ')) {
       const next = line ? line + ' ' + w : w;
@@ -1157,12 +1302,12 @@ body { margin: 0; }
     const vl = ann ? vertLabel(`${it.t.pre || ''}${fmt(it.b)}${it.t.unit}:`, closedAns ? it.t.yes : it.t.no) : null;
     if (ann && it.vlen) vl.len = it.vlen;   // measured length from the last draw
     const y = ann ? Math.max(110, Math.ceil(46 + vl.len + 10)) : 42;
-    const H = ann ? y + 58 : 100;
+    const H = ann ? y + 64 : 106;
     const lw = svg.parentNode, card = svg.closest('.card');
     lw.style.height = `calc(${(H / 100).toFixed(3)} * clamp(104px, 11vw, 136px))`;
     if (card && !lw.closest('[hidden]')) {
       const over = card.scrollHeight - card.clientHeight;
-      if (over > 0) lw.style.height = Math.max(96, lw.offsetHeight - over) + 'px';
+      if (over > 0) lw.style.height = Math.max(innerWidth <= 520 ? 64 : 96, lw.offsetHeight - over - 2) + 'px';
     }
     sizeLine(svg, H);
     const W = GEO.W, R = W - 20, L = 20, mid = W / 2;
@@ -1171,7 +1316,7 @@ body { margin: 0; }
     for (let i = 0; i < N_TICKS; i++) {
       const tx = tickX(i);
       h += `<line x1="${tx}" y1="${y - 9}" x2="${tx}" y2="${y + 9}" class="tick"/>`;
-      h += `<text x="${tx}" y="${y + 34}" class="tlabel">${fmt(tickVal(it, i))}</text>`;
+      h += `<text x="${tx}" y="${y + 38}" class="tlabel">${fmt(tickVal(it, i))}</text>`;
     }
     if (g.p !== null && it.following && it.drag !== null) {
       const px = tickX(g.p), ex = Math.max(L, Math.min(R, it.drag));
@@ -1198,7 +1343,7 @@ body { margin: 0; }
       const by = y - 46, gap = Math.max(16, vl.width / 2 + 10);
       const shadeA = right ? px + gap : L, shadeB = right ? R : px - gap;
       const restA = right ? 14 : px + gap, restB = right ? px - gap : W - 14;
-      const bracket = (a, b, cls) => b - a > 12 ? `<path d="M${a} ${by + 7} L${a} ${by} L${b} ${by} L${b} ${by + 7}" class="ann-br ${cls}"/>` : '';
+      const bracket = (a, b, cls) => b - a > 12 ? `<line x1="${a}" y1="${by}" x2="${b}" y2="${by}" class="ann-br ${cls}"/>` : '';
       h += bracket(shadeA, shadeB, 'yes') + bracket(restA, restB, 'no');
       h += labelSVG((shadeA + shadeB) / 2, fitLabel('\u2713 ' + t.yes, Math.max(80, shadeB - shadeA)), by - 8, 'yes', W);
       h += labelSVG((restA + restB) / 2, fitLabel('\u2717 ' + t.no, Math.max(80, restB - restA)), by - 8, 'no', W);
@@ -1215,11 +1360,14 @@ body { margin: 0; }
       // Measure the rotated label and redraw once so the space above fits it exactly
       try {
         const m = Math.max(...[...svg.querySelectorAll('.vert tspan')].map(t => t.getComputedTextLength()));
-        if (m > 0 && Math.abs(m - vl.len) > 3) { it.vlen = m; drawLine(); }
+        if (m > 0 && Math.abs(m + 6 - vl.len) > 3) { it.vlen = m + 6; drawLine(); }
       } catch (_) {}
     }
   }
   window.addEventListener('resize', () => { if (state.items.length && !state.finished) { drawReal(); drawLine(); } });
+  // Labels are measured in the page's fonts; when those finish loading, measure again
+  function remeasure() { state.items.forEach(x => { delete x.vlen; }); if (state.items.length && !state.finished) { drawReal(); drawLine(); } }
+  try { document.fonts.ready.then(remeasure); document.fonts.addEventListener('loadingdone', remeasure); } catch (_) {}
   function renderAll(keepFocus) {
     if (state.finished) { renderHeader(); renderFinish(); return; }
     state.items.forEach(x => { x.following = false; x.drag = null; });
@@ -1285,7 +1433,7 @@ body { margin: 0; }
     const svg = $('#nl');
     const ghost = cx => { const gh = $('#ghost'); if (gh) gh.setAttribute('cx', cx); };
     svg.addEventListener('pointerdown', e => {
-      if (!it.aOk || it.done) return;
+      if (!it.aOk || it.gOk) return;
       const x = svgX(e); if (x === null) return;
       e.preventDefault();
       if (it.following) { commitArrow(it, x); return; }
@@ -1314,11 +1462,11 @@ body { margin: 0; }
     svg.addEventListener('pointermove', e => {
       if (it.following) return;
       const x = svgX(e); if (x === null) return;
-      ghost(it.aOk && !it.done ? tickX(idxAt(x)) : -100);
+      ghost(it.aOk && !it.gOk ? tickX(idxAt(x)) : -100);
     });
     svg.addEventListener('pointerleave', () => ghost(-100));
     svg.addEventListener('keydown', e => {
-      if (!it.aOk) return;
+      if (!it.aOk || it.gOk) return;
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         e.preventDefault();
         if (!it.g.c) it.g.c = 'open';
@@ -1335,9 +1483,19 @@ body { margin: 0; }
     document.querySelectorAll('[data-c]').forEach(x => x.addEventListener('click', () => { it.g.c = x.dataset.c; paintCard(); }));
     $('#clear').addEventListener('click', () => { it.g = { p: null, c: null, d: null }; paintCard(); });
     $('#check-g').addEventListener('click', checkGraph);
-    $('#prev').addEventListener('click', () => { if (state.i > 0) { state.i--; renderAll(); } });
-    $('#fb-g').addEventListener('click', () => { if (cur().done) goNext(); });
-    $('#fb-g').addEventListener('keydown', e => { if ((e.key === ' ') && cur().done) { e.preventDefault(); goNext(); } });
+    const nh = $('#next-hint'); if (nh) nh.addEventListener('click', () => { if (cur().done) goNext(); });
+    const rb = $('#real-btn'); if (rb) rb.addEventListener('click', e => { e.stopPropagation(); it.showReal = !it.showReal; renderAll(); });
+    const ti = $('#try-input');
+    if (ti) {
+      // a value that works is accepted on its own a moment after typing stops; wrong values wait for Enter or Check
+      ti.addEventListener('input', () => {
+        it.tryRaw = ti.value;
+        clearTimeout(autoTimer);
+        autoTimer = setTimeout(() => { if (cur() === it && !it.done && tryWorks(it, ti.value)) checkTry(); }, 450);
+      });
+      ti.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); checkTry(); } });
+      $('#try-check').addEventListener('click', checkTry);
+    }
     const tb = $('#turnin-btn'); if (tb) tb.addEventListener('click', openTurnIn);
   }
   document.addEventListener('keydown', e => {
@@ -1347,6 +1505,8 @@ body { margin: 0; }
     e.preventDefault();
     if (it.done) {
       goNext();
+    } else if (it.gOk) {
+      const ti = $('#try-input'); if (ti) ti.focus();
     } else if (it.aOk && it.g.p !== null) {
       checkGraph();
     }
