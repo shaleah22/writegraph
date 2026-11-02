@@ -343,36 +343,36 @@ body { margin: 0; }
 @media (min-width: 900px) { .card { padding: 18px 28px; gap: 14px; } }
 @media (max-width: 520px) { .card { padding: 8px 12px; gap: 6px; } .plate { width: 92px; } .plate .big { font-size: 1.6rem; } .scenario { flex-wrap: nowrap; gap: 12px; } .scn-text { flex: 1 1 0; } .situation { font-size: 1.02rem; } .step-head .fb { flex-basis: 150px; } .step-head h3 .lbl { display: none; } .real-cap { font-size: .86rem; line-height: 1.35; } #rl { height: 52px; } .graph-cap .long { display: none; } .graph-cap { font-size: .88rem; } .fb.ok { font-size: 1.3rem; padding: 4px 10px; } .go-next { font-size: .85rem; padding: 4px 10px; } .plate { width: 84px; } .plate .big { font-size: 1.45rem; } .plate .ln { font-size: .72rem; } }
 
-/* ---- turn-in page ---- */
+/* ---- turn-in page (Microsoft Form, cropped to its Submit button) ---- */
 .turnin { flex: 1 1 auto; min-height: 0; overflow: auto; background: var(--surface); border: 2px solid var(--good); border-radius: 16px;
   padding: 20px clamp(16px, 4vw, 36px); display: flex; flex-direction: column; gap: 14px; }
 .ti-top { display: flex; align-items: center; gap: 18px; }
 .turnin .big-check { flex: 0 0 auto; width: 64px; height: 64px; border-radius: 50%; background: var(--good); color: var(--good-bg); display: grid; place-items: center; font-size: 36px; font-weight: 900; }
 .turnin h2 { margin: 0; font: 900 clamp(1.8rem, 5vw, 2.6rem)/1.05 var(--f-display); color: var(--good); }
 .ti-sub { margin: 4px 0 0; color: var(--muted); font-size: 1.05rem; }
-#gform { display: flex; flex-direction: column; gap: 12px; max-width: 760px; }
-.ti-warn { background: var(--good-bg); border-radius: 10px; padding: 10px 14px; font-size: .98rem; }
-.ti-fields { display: grid; grid-template-columns: 110px 1fr 1fr; gap: 12px; }
-@media (max-width: 600px) { .ti-fields { grid-template-columns: 1fr; } }
-.ti-field label { display: flex; align-items: center; margin-bottom: 4px; font-weight: 700; }
-.ti-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: 8px; border-radius: 50%; background: var(--ink); color: var(--surface); font-size: 13px; }
-.ti-field input { font: inherit; font-size: 1.05rem; color: var(--ink); width: 100%; border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 12px; background: var(--bg); }
-.ti-field input:focus { outline: 2px solid var(--plot); outline-offset: 1px; }
-.ti-check { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 14px; display: grid; gap: 2px; }
-.ti-check .hd { color: var(--muted); font-size: .9rem; }
-.ti-check .r { display: flex; gap: 12px; align-items: baseline; }
-.ti-check .r:last-child { padding-top: 4px; border-top: 1px solid var(--line); margin-top: 2px; }
-.ti-check .t { color: var(--muted); min-width: 88px; font-size: .9rem; }
-.ti-check .v.empty { color: var(--muted); }
-.ti-btn { align-self: flex-start; font-size: 1.05rem; padding: 12px 22px; }
-.ti-feedback { margin: 0; font-size: 1.05rem; }
-.ti-feedback:empty { display: none; }
-.ti-feedback .ok { color: var(--good); font: 900 1.6rem var(--f-display); }
-.ti-feedback .nt { color: var(--muted); }
+.ti-formcol { max-width: 760px; display: flex; flex-direction: column; gap: 6px; }
+.ti-press2 { margin: 0 0 4px; color: var(--ink); font-size: 1.1rem; line-height: 1.45; }
+.ti-press2 small { display: block; color: var(--muted); font-size: .85em; margin-top: 4px; }
+.ti-crop { position: relative; }
+.ti-form { display: block; width: 100%; height: calc(100vh - 140px); min-height: 420px; border: 2px solid var(--line); border-radius: 12px; background: #fff; }
+.turnin.cropped .ti-crop { overflow: hidden; height: var(--crop-h); width: var(--crop-w); max-width: 100%; box-sizing: content-box; border: 2px solid var(--line); border-radius: 12px; background: #fff; }
+.turnin.cropped .ti-form { position: absolute; left: calc(-1px * var(--crop-x)); top: calc(-1px * var(--crop-y));
+  width: 528px; height: 1600px; min-height: 0; border: 0; border-radius: 0; max-width: none; }
+.turnin.cropped #ti-fallback { display: none; }
+.ti-how { margin: 4px 0 0; color: var(--muted); font-size: .9rem; }
+.ti-how a { color: var(--plot); }
 .ti-after { display: flex; }
 .turnin-btn { border-color: var(--good); color: var(--good); }
 .turnin h2.early { color: var(--ink); }
 .turnin:has(h2.early) { border-color: var(--line); }
+/* one-time setup screen: open the drill with #setup at the end of its address */
+.cal { position: fixed; inset: 0; z-index: 200; background: #f4f6f9; overflow: auto; font: 600 16px/1.45 Tahoma, Verdana, sans-serif; color: #1a202c; }
+.cal-in { max-width: 760px; margin: 16px auto; background: #fff; border-radius: 16px; padding: 20px 24px; box-shadow: 0 6px 24px rgba(0,0,0,.08); }
+.cal h2 { margin: 0 0 6px; } .cal p { margin: 6px 0 12px; color: #4a5568; }
+.cal label { display: flex; gap: 12px; align-items: center; margin: 8px 0; } .cal input[type=range] { flex: 1; }
+.cal .cal-win { position: relative; overflow: hidden; border: 3px solid #1d4fa0; border-radius: 12px; background: #fff; margin: 14px 0; }
+.cal .cal-win iframe { position: absolute; width: 528px; height: 1600px; border: 0; }
+.cal-out { font-size: 1.2em; background: #ebf8ff; border-radius: 10px; padding: 10px 14px; }
 
 /* ---- White page, bigger and bolder text ---- */
 body { font-size: 18px; font-weight: 700; }
@@ -401,7 +401,7 @@ body { font-size: 18px; font-weight: 700; }
 .btn { font-size: 1.05rem; }
 .seg button { font-size: 1.05rem; font-weight: 700; }
 .linkbtn { font-size: 1rem; font-weight: 700; color: var(--ink); }
-.ti-sub, .ti-check .t, .ti-check .hd { color: var(--ink); }
+.ti-sub { color: var(--ink); }
 @media (max-width: 520px) {
   body { font-size: 16px; }
   .situation { font-size: 1.1rem; }
@@ -825,9 +825,17 @@ body { font-family: var(--f-body); font-size: clamp(18px, 2.4vh, 24px); font-wei
   const N_TICKS = 11;
 
   const GOAL = 40;
-  // Google Form that collects results (same form as the Distributive Property drill).
-  // Left empty on the claude.ai page, where sending to other sites is blocked; the downloaded copy fills it in.
-  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe4_Gnrq1zyrttA3lSgrVBtMkaVaoMim31ByzoH-orxmfDB2A/formResponse';
+  // Microsoft Form that collects results (the same form as the One-Step Equations drill).
+  // Students' names come from their school sign-in ("Record name" is on), so the drill never asks for a name.
+  // From the form's "Get pre-filled URL" link: url = everything before the first &, score/results = the r... codes.
+  const MS_FORM = {
+    url:     'https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=y7Ws7nBTWEOpaqN4PJXUIl-SIiqFputDkoByW916pXZUNDRQTTZMTFZVMFVBME1VSzVTUFlPOE1GUS4u',
+    score:   're0712995f44f4c60853aa931e7a40a25',
+    results: 'rbd5e36321bab43a4ab3c7a497c55c804',
+    /* "button only": show students just the form's Submit button, so they can't see or change the boxes.
+       Open the drill with #setup at the end of its address to fine-tune these numbers. null = show the whole form. */
+    submitButton: { x: 7, y: 532, width: 515, height: 56 }
+  };
   const DRILL_NAME = 'Inequalities: Write It, Graph It';
   function makeItem(t) {
     const b = pick(t.values);
@@ -867,8 +875,6 @@ body { font-family: var(--f-body); font-size: clamp(18px, 2.4vh, 24px); font-wei
   const correctCount = () => state.items.filter(x => x.done && !x.miss).length;
   function startDrill() {
     state.items = []; state.i = 0; state.finished = false; state.autoShown = false;
-    state.form = state.form || { period: '', last: '', first: '' };
-    state.submitted = false; state.submittedAt = 0; state.note = '';
     addOne();
     renderAll();
   }
@@ -1013,69 +1019,46 @@ body { font-family: var(--f-body); font-size: clamp(18px, 2.4vh, 24px); font-wei
   function renderHeader() {
     $('#banner').innerHTML = '';
   }
-  function openTurnIn() { state.finished = true; state.note = ''; renderAll(); }
+  function openTurnIn() { state.finished = true; renderAll(); }
   function closeTurnIn() { state.finished = false; if (cur().done) goNext(); else renderAll(); }
   function triedCount() { return state.items.filter(x => x.done || x.miss).length; }
+  // a short code worked out from the score, so a score changed by hand in the form stands out
+  function checkCode(right, tried) {
+    const x = (right * 37 + tried * 11 + 23) % 676;
+    return String.fromCharCode(65 + x % 26) + String.fromCharCode(65 + Math.floor(x / 26));
+  }
+  // the Microsoft Form link with this student's results already filled in
+  function formLink() {
+    const n = correctCount(), tried = triedCount();
+    const text = `${n} correct on the first try${n < GOAL ? ' so far' : ''} (${tried} problems tried) — ${DRILL_NAME} — check ${checkCode(n, tried)}`;
+    let u = MS_FORM.url + '&' + MS_FORM.score + '=' + n;
+    if (MS_FORM.results) u += '&' + MS_FORM.results + '=' + encodeURIComponent(text);
+    return u;
+  }
   function renderFinish() {
-    const n = correctCount(), tried = triedCount(), f = state.form;
-    const more = state.submitted && n > state.submittedAt;
+    const n = correctCount(), tried = triedCount();
     const early = n < GOAL;
-    const showForm = !state.submitted || more;
-    $('#card').innerHTML = `<section class="turnin" role="dialog" aria-labelledby="ti-title">
+    const crop = !!MS_FORM.submitButton, b = MS_FORM.submitButton || {};
+    const url = formLink();
+    $('#card').innerHTML = `<section class="turnin${crop ? ' cropped' : ''}" role="dialog" aria-labelledby="ti-title"
+        style="--crop-x:${b.x || 0};--crop-y:${b.y || 0};--crop-h:${b.height || 90}px;--crop-w:${b.width || (528 - (b.x || 0))}px">
       <div class="ti-top">
         ${early ? '' : '<div class="big-check" aria-hidden="true">✓</div>'}
         <div>
           <h2 id="ti-title" class="${early ? 'early' : ''}">${early ? 'Turn in early' : `${n} correct!`}</h2>
-          <p class="ti-sub">${early ? `${n} of ${GOAL} correct. ` : ''}${tried} problems tried. ${showForm ? 'Enter your period and name to turn in.' : ''}</p>
+          <p class="ti-sub">${early ? `${n} of ${GOAL} correct. ` : ''}${tried} problems tried.</p>
         </div>
       </div>
-      <iframe name="hidden_iframe" id="hidden_iframe" title="Sending" style="display:none"></iframe>
-      <form id="gform" ${FORM_URL ? `action="${FORM_URL}" method="POST" target="hidden_iframe"` : ''} ${showForm ? '' : 'hidden'}>
-        <div class="ti-warn">Last name in the <b>Last name</b> box, first name in the <b>First name</b> box. Swapped names count as missing.</div>
-        <div class="ti-fields">
-          <div class="ti-field ti-period"><label for="studentPeriod"><span class="ti-num">1</span>Period</label>
-            <input type="number" id="studentPeriod" placeholder="e.g. 3" min="1" max="10" required value="${esc(f.period)}"></div>
-          <div class="ti-field"><label for="lastName"><span class="ti-num">2</span>LAST name</label>
-            <input type="text" id="lastName" placeholder="Rodriguez" autocomplete="family-name" required value="${esc(f.last)}"></div>
-          <div class="ti-field"><label for="firstName"><span class="ti-num">3</span>FIRST name</label>
-            <input type="text" id="firstName" placeholder="Maria" autocomplete="given-name" required value="${esc(f.first)}"></div>
-        </div>
-        <div class="ti-check" id="nameCheck"></div>
-        <input type="hidden" id="studentName" name="entry.1899284808" value="">
-        <input type="hidden" id="formScore" name="entry.1974610095" value="">
-        <button type="submit" class="btn primary ti-btn" id="ti-submit">${more ? 'Send updated results' : 'Submit results'}</button>
-      </form>
-      <p class="ti-feedback" id="ti-feedback">${state.note || (more ? `You turned in ${state.submittedAt}. Send again to update to ${n}.` : '')}</p>
+      <div class="ti-formcol">
+        <p class="ti-press2"><b>Press Submit to turn in your score.</b>
+          <small>When the button goes away, you're done.</small></p>
+        <div class="ti-crop"><iframe id="ti-form" class="ti-form" title="Turn in your work"></iframe></div>
+        <p class="ti-how" id="ti-fallback">Form not showing? <a id="ti-open" href="${esc(url)}" target="_blank" rel="noopener">Open it in a new tab</a>.</p>
+      </div>
       <div class="ti-after"><button class="btn" type="button" id="ti-back">${early ? 'Back to the problems' : 'Keep practicing'}</button></div>
     </section>`;
-    const nameCheck = () => {
-      const ln = $('#lastName').value.trim(), fn = $('#firstName').value.trim();
-      const row = (t, v) => `<div class="r"><span class="t">${t}</span><span class="v${v ? '' : ' empty'}">${v ? esc(v) : '—'}</span></div>`;
-      $('#nameCheck').innerHTML = '<div class="hd">Check your name:</div>' + row('Last name', ln) + row('First name', fn) + row('Roll call', ln && fn ? ln + ', ' + fn : '');
-    };
-    nameCheck();
-    [['studentPeriod', 'period'], ['lastName', 'last'], ['firstName', 'first']].forEach(([id, k]) =>
-      $('#' + id).addEventListener('input', e => { state.form[k] = e.target.value; nameCheck(); }));
-    $('#hidden_iframe').addEventListener('load', () => {
-      if (!state.sending) return;
-      state.sending = false;
-      state.note = '<span class="ok">Submitted. Your teacher has your results.</span>';
-      renderAll();
-    });
-    $('#gform').addEventListener('submit', e => {
-      const ln = $('#lastName').value.trim(), fn = $('#firstName').value.trim(), pd = $('#studentPeriod').value.trim();
-      $('#studentName').value = `Period ${pd} — ${ln} — ${fn} — ${correctCount()} correct on the first try — ${DRILL_NAME} (${triedCount()} problems)`;
-      $('#formScore').value = correctCount();
-      if (!FORM_URL) {
-        e.preventDefault();
-        $('#ti-feedback').innerHTML = '<span class="nt">This is a preview. Turning in works in the downloaded copy of the drill.</span>';
-        return;
-      }
-      state.submitted = true; state.submittedAt = correctCount(); state.sending = true;
-      $('#ti-feedback').textContent = 'Sending…';
-    });
+    $('#ti-form').src = url + '&embed=true';
     $('#ti-back').addEventListener('click', closeTurnIn);
-    if (showForm) setTimeout(() => { const el = $(f.period ? (f.last ? (f.first ? '#ti-submit' : '#firstName') : '#lastName') : '#studentPeriod'); if (el) el.focus(); }, 50);
   }
   function plateHTML(p) {
     if (!p) return '';
@@ -1515,6 +1498,36 @@ body { font-family: var(--f-body); font-size: clamp(18px, 2.4vh, 24px); font-wei
     const go = e.target.closest('[data-go]');
     if (go) { state.i = +go.dataset.go; renderAll(); }
   });
+
+  // one-time setup for "button only": open the drill with #setup at the end of its address
+  if (location.hash === '#setup') {
+    const sample = MS_FORM.url + '&' + MS_FORM.score + '=40'
+      + (MS_FORM.results ? '&' + MS_FORM.results + '=' + encodeURIComponent(`40 correct on the first try (52 problems tried) — ${DRILL_NAME} — check XX`) : '')
+      + '&embed=true';
+    const b0 = MS_FORM.submitButton || { x: 0, y: 500, width: 528, height: 90 };
+    const d = document.createElement('div'); d.className = 'cal';
+    d.innerHTML = '<div class="cal-in"><h2>Set up: show only the Submit button</h2>'
+      + '<p>Drag the sliders until the form\'s <b>Submit</b> button sits inside the blue box with a little space around it. '
+      + 'Nothing is turned in from this page unless you press Submit.</p>'
+      + `<label>Up / down <input type="range" id="cal-y" min="0" max="1500" value="${b0.y}"><span id="cal-yv"></span></label>`
+      + `<label>Left / right <input type="range" id="cal-x" min="0" max="400" value="${b0.x || 0}"><span id="cal-xv"></span></label>`
+      + `<label>Box width <input type="range" id="cal-w" min="100" max="528" value="${b0.width || 528}"><span id="cal-wv"></span></label>`
+      + `<label>Box height <input type="range" id="cal-h" min="50" max="200" value="${b0.height || 90}"><span id="cal-hv"></span></label>`
+      + '<div class="cal-win" id="cal-win"><iframe id="cal-f" title="Form preview"></iframe></div>'
+      + '<div class="cal-out">Your setting: <code id="cal-out"></code></div>'
+      + '<p>Send this line to Claude, or paste it over the <code>submitButton:</code> line in the drill file.</p></div>';
+    document.body.appendChild(d);
+    $('#cal-f').src = sample;
+    const upd = () => {
+      const x = +$('#cal-x').value, y = +$('#cal-y').value, w = +$('#cal-w').value, h = +$('#cal-h').value;
+      $('#cal-xv').textContent = x; $('#cal-yv').textContent = y; $('#cal-hv').textContent = h; $('#cal-wv').textContent = w;
+      $('#cal-win').style.height = h + 'px'; $('#cal-win').style.width = w + 'px';
+      $('#cal-f').style.left = (-x) + 'px'; $('#cal-f').style.top = (-y) + 'px';
+      $('#cal-out').textContent = `submitButton: { x: ${x}, y: ${y}, width: ${w}, height: ${h} }`;
+    };
+    ['cal-x', 'cal-y', 'cal-w', 'cal-h'].forEach(id => $('#' + id).addEventListener('input', upd));
+    upd();
+  }
 
   startDrill();
 })();
