@@ -826,9 +826,9 @@ body { font-family: var(--f-body); font-size: clamp(18px, 2.4vh, 24px); font-wei
   const N_TICKS = 11;
 
   const GOAL = 40;
-  // Google Form that collects results (same form as the Distributive Property drill).
+  // Google Form that collects results: Student code, Number correct, Drill.
   // Left empty on the claude.ai page, where sending to other sites is blocked; the downloaded copy fills it in.
-  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe4_Gnrq1zyrttA3lSgrVBtMkaVaoMim31ByzoH-orxmfDB2A/formResponse';
+  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScLjdoG75r1XORoNx4v6u-1TEzXcuQoJqQIvbbEmD_QlFFzmA/formResponse';
   const DRILL_NAME = 'Inequalities: Write It, Graph It';
   function makeItem(t) {
     const b = pick(t.values);
@@ -1036,8 +1036,9 @@ body { font-family: var(--f-body); font-size: clamp(18px, 2.4vh, 24px); font-wei
           <div class="ti-field"><label for="studentCode">Student code</label>
             <input type="text" id="studentCode" placeholder="Your code" autocomplete="off" autocapitalize="characters" spellcheck="false" required value="${esc(f.code)}"></div>
         </div>
-        <input type="hidden" id="studentName" name="entry.1899284808" value="">
-        <input type="hidden" id="formScore" name="entry.1974610095" value="">
+        <input type="hidden" id="formCode" name="entry.1999309314" value="">
+        <input type="hidden" id="formScore" name="entry.1276394101" value="">
+        <input type="hidden" id="formDrill" name="entry.582215829" value="">
         <button type="submit" class="btn primary ti-btn" id="ti-submit">${more ? 'Send updated results' : 'Submit results'}</button>
       </form>
       <p class="ti-feedback" id="ti-feedback">${state.note || (more ? `You turned in ${state.submittedAt}. Send again to update to ${n}.` : '')}</p>
@@ -1056,8 +1057,9 @@ body { font-family: var(--f-body); font-size: clamp(18px, 2.4vh, 24px); font-wei
     });
     $('#gform').addEventListener('submit', e => {
       const code = $('#studentCode').value.trim().toUpperCase();
-      $('#studentName').value = `${code} — ${correctCount()} correct — ${DRILL_NAME}`;
+      $('#formCode').value = code;
       $('#formScore').value = correctCount();
+      $('#formDrill').value = DRILL_NAME;
       if (!FORM_URL) {
         e.preventDefault();
         $('#ti-feedback').innerHTML = '<span class="nt">This is a preview. Turning in works in the downloaded copy of the drill.</span>';
